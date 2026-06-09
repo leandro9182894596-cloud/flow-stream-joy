@@ -3,6 +3,7 @@
 import type { Account, UserInfo } from "./xtream";
 
 const ACCOUNT_KEY = "flowtv.account";
+const DNS_KEY = "flowtv.dns";
 const USERINFO_KEY = "flowtv.userinfo";
 const PROGRESS_KEY = "flowtv.progress";
 const FAV_KEY = "flowtv.favorites";
@@ -42,6 +43,24 @@ export function clearAccount() {
   Object.keys(localStorage)
     .filter((k) => k.startsWith(CACHE_PREFIX))
     .forEach((k) => localStorage.removeItem(k));
+}
+
+// ---------- Admin DNS ----------
+export function loadDns(): string | null {
+  if (!isBrowser) return null;
+  try {
+    return localStorage.getItem(DNS_KEY);
+  } catch {
+    return null;
+  }
+}
+export function saveDns(dns: string) {
+  if (!isBrowser) return;
+  localStorage.setItem(DNS_KEY, dns);
+}
+export function clearDns() {
+  if (!isBrowser) return;
+  localStorage.removeItem(DNS_KEY);
 }
 
 // ---------- Cache (TTL) ----------
