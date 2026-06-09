@@ -1,15 +1,16 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { MonitorPlay, Loader2, Server, User, Lock, Eye, EyeOff } from "lucide-react";
+import { MonitorPlay, Loader2, User, Lock, Eye, EyeOff, Settings } from "lucide-react";
 import { authenticate, normalizeBase, FlowApiError, ERROR_MESSAGES } from "../lib/xtream";
 import { useAccount } from "../hooks/use-account";
+import { loadDns } from "../lib/storage";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Entrar — FLOW TV" },
-      { name: "description", content: "Acesse sua lista IPTV no FLOW TV com servidor, usuário e senha." },
+      { name: "description", content: "Acesse sua lista IPTV no FLOW TV com usuário e senha." },
     ],
   }),
   component: LoginPage,
@@ -18,11 +19,15 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const { login, account, ready } = useAccount();
-  const [server, setServer] = useState("");
+  const [dns, setDns] = useState<string | null>(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setDns(loadDns());
+  }, []);
 
   useEffect(() => {
     if (ready && account) navigate({ to: "/" });
@@ -30,8 +35,15 @@ function LoginPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!server.trim() || !username.trim() || !password.trim()) {
-      toast.error("Preencha servidor, usuário e senha.");
+    const server = loadDns();
+    if (!server) {
+      toast.error("Servidor não configurado", {
+        description: "Peça ao administrador para cadastrar a DNS na página de Admin.",
+      });
+      return;
+    }
+    if (!username.trim() || !password.trim()) {
+      toast.error("Preencha usuário e senha.");
       return;
     }
     setLoading(true);
