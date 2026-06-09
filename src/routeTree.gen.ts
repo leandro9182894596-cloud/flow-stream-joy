@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SeriesRouteImport } from './routes/series'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as MoviesRouteImport } from './routes/movies'
@@ -20,6 +21,11 @@ import { Route as SeriesIdRouteImport } from './routes/series.$id'
 import { Route as MovieIdRouteImport } from './routes/movie.$id'
 import { Route as ApiPublicXtreamRouteImport } from './routes/api/public/xtream'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SeriesRoute = SeriesRouteImport.update({
   id: '/series',
   path: '/series',
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/movies': typeof MoviesRoute
   '/search': typeof SearchRoute
   '/series': typeof SeriesRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/movie/$id': typeof MovieIdRoute
   '/series/$id': typeof SeriesIdRoute
   '/api/public/xtream': typeof ApiPublicXtreamRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/movies': typeof MoviesRoute
   '/search': typeof SearchRoute
   '/series': typeof SeriesRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/movie/$id': typeof MovieIdRoute
   '/series/$id': typeof SeriesIdRoute
   '/api/public/xtream': typeof ApiPublicXtreamRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/movies': typeof MoviesRoute
   '/search': typeof SearchRoute
   '/series': typeof SeriesRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/movie/$id': typeof MovieIdRoute
   '/series/$id': typeof SeriesIdRoute
   '/api/public/xtream': typeof ApiPublicXtreamRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/movies'
     | '/search'
     | '/series'
+    | '/sitemap.xml'
     | '/movie/$id'
     | '/series/$id'
     | '/api/public/xtream'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/movies'
     | '/search'
     | '/series'
+    | '/sitemap.xml'
     | '/movie/$id'
     | '/series/$id'
     | '/api/public/xtream'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/movies'
     | '/search'
     | '/series'
+    | '/sitemap.xml'
     | '/movie/$id'
     | '/series/$id'
     | '/api/public/xtream'
@@ -155,12 +167,20 @@ export interface RootRouteChildren {
   MoviesRoute: typeof MoviesRoute
   SearchRoute: typeof SearchRoute
   SeriesRoute: typeof SeriesRouteWithChildren
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   MovieIdRoute: typeof MovieIdRoute
   ApiPublicXtreamRoute: typeof ApiPublicXtreamRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/series': {
       id: '/series'
       path: '/series'
@@ -253,9 +273,20 @@ const rootRouteChildren: RootRouteChildren = {
   MoviesRoute: MoviesRoute,
   SearchRoute: SearchRoute,
   SeriesRoute: SeriesRouteWithChildren,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   MovieIdRoute: MovieIdRoute,
   ApiPublicXtreamRoute: ApiPublicXtreamRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
