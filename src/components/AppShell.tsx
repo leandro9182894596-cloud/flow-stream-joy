@@ -3,13 +3,13 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Tv, Film, MonitorPlay, Clapperboard, LogOut, Search, Heart } from "lucide-react";
 import { useAccount } from "../hooks/use-account";
 
-const NAV = [
+const NAV: { to: string; label: string; icon: typeof Tv; exact?: boolean }[] = [
   { to: "/", label: "Início", icon: MonitorPlay, exact: true },
   { to: "/live", label: "TV ao Vivo", icon: Tv },
   { to: "/movies", label: "Filmes", icon: Film },
   { to: "/series", label: "Séries", icon: Clapperboard },
   { to: "/favorites", label: "Favoritos", icon: Heart },
-] as const;
+];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { userInfo, logout } = useAccount();
