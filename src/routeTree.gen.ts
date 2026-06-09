@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SeriesRouteImport } from './routes/series'
 import { Route as MoviesRouteImport } from './routes/movies'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as LiveRouteImport } from './routes/live'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicXtreamRouteImport } from './routes/api/public/xtream'
 
@@ -30,6 +31,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LiveRoute = LiveRouteImport.update({
+  id: '/live',
+  path: '/live',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -43,6 +49,7 @@ const ApiPublicXtreamRoute = ApiPublicXtreamRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/live': typeof LiveRoute
   '/login': typeof LoginRoute
   '/movies': typeof MoviesRoute
   '/series': typeof SeriesRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/live': typeof LiveRoute
   '/login': typeof LoginRoute
   '/movies': typeof MoviesRoute
   '/series': typeof SeriesRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/live': typeof LiveRoute
   '/login': typeof LoginRoute
   '/movies': typeof MoviesRoute
   '/series': typeof SeriesRoute
@@ -65,14 +74,28 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/movies' | '/series' | '/api/public/xtream'
+  fullPaths:
+    | '/'
+    | '/live'
+    | '/login'
+    | '/movies'
+    | '/series'
+    | '/api/public/xtream'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/movies' | '/series' | '/api/public/xtream'
-  id: '__root__' | '/' | '/login' | '/movies' | '/series' | '/api/public/xtream'
+  to: '/' | '/live' | '/login' | '/movies' | '/series' | '/api/public/xtream'
+  id:
+    | '__root__'
+    | '/'
+    | '/live'
+    | '/login'
+    | '/movies'
+    | '/series'
+    | '/api/public/xtream'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LiveRoute: typeof LiveRoute
   LoginRoute: typeof LoginRoute
   MoviesRoute: typeof MoviesRoute
   SeriesRoute: typeof SeriesRoute
@@ -102,6 +125,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/live': {
+      id: '/live'
+      path: '/live'
+      fullPath: '/live'
+      preLoaderRoute: typeof LiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -121,6 +151,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LiveRoute: LiveRoute,
   LoginRoute: LoginRoute,
   MoviesRoute: MoviesRoute,
   SeriesRoute: SeriesRoute,
