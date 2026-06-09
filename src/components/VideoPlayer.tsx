@@ -702,5 +702,3 @@ function MenuList({
     </div>
   );
 }
-
-import type { ReactNode } from "react";
