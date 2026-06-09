@@ -82,18 +82,12 @@ function LoginPage() {
           onSubmit={onSubmit}
           className="space-y-4 rounded-2xl border border-border bg-card/80 p-6 shadow-card backdrop-blur"
         >
-          <Field icon={Server} label="Servidor (DNS)">
-            <input
-              type="text"
-              inputMode="url"
-              autoCapitalize="none"
-              autoCorrect="off"
-              placeholder="http://seuservidor.com:8080"
-              value={server}
-              onChange={(e) => setServer(e.target.value)}
-              className="w-full bg-transparent text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
-            />
-          </Field>
+          {!dns && (
+            <p className="rounded-xl border border-destructive/40 bg-destructive/10 px-3.5 py-3 text-xs text-destructive">
+              Nenhuma DNS configurada. Acesse a página de Admin para cadastrar o servidor.
+            </p>
+          )}
+
 
           <Field icon={User} label="Usuário">
             <input
