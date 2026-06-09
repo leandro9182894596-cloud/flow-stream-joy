@@ -130,6 +130,13 @@ function LoginPage() {
           <p className="text-center text-xs text-muted-foreground">
             Seus dados ficam salvos apenas neste dispositivo.
           </p>
+
+          <Link
+            to="/admin"
+            className="focusable flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground hover:text-foreground"
+          >
+            <Settings className="h-3.5 w-3.5" /> Configurar DNS (Admin)
+          </Link>
         </form>
       </div>
     </div>
@@ -141,7 +148,7 @@ function Field({
   label,
   children,
 }: {
-  icon: typeof Server;
+  icon: typeof User;
   label: string;
   children: React.ReactNode;
 }) {
