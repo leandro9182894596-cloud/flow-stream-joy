@@ -222,12 +222,28 @@ export const getSeriesInfo = (a: Account, seriesId: number) =>
   apiCall<SeriesInfo>(a, { action: "get_series_info", series_id: String(seriesId) });
 
 // ---------- Stream URL builders ----------
+// The app runs on HTTPS but Xtream streams are usually plain HTTP. Browsers
+// block mixed content, so we route every stream through the HTTPS media proxy.
+// For HLS (.m3u8) the proxy rewrites child URLs too; we keep the .m3u8 suffix
+// in the proxied URL so the player still detects HLS.
+function proxiedUrl(absoluteUrl: string): string {
+  if (typeof window === "undefined") return absoluteUrl;
+  const hls = /\.m3u8($|\?)/i.test(absoluteUrl) ? "&ext=.m3u8" : "";
+  return `/api/public/stream?url=${encodeURIComponent(absoluteUrl)}${hls}`;
+}
+
 export function liveStreamUrl(a: Account, streamId: number): string {
-  return `${a.base}/live/${encodeURIComponent(a.username)}/${encodeURIComponent(a.password)}/${streamId}.m3u8`;
+  return proxiedUrl(
+    `${a.base}/live/${encodeURIComponent(a.username)}/${encodeURIComponent(a.password)}/${streamId}.m3u8`,
+  );
 }
 export function vodStreamUrl(a: Account, streamId: number, ext = "mp4"): string {
-  return `${a.base}/movie/${encodeURIComponent(a.username)}/${encodeURIComponent(a.password)}/${streamId}.${ext}`;
+  return proxiedUrl(
+    `${a.base}/movie/${encodeURIComponent(a.username)}/${encodeURIComponent(a.password)}/${streamId}.${ext}`,
+  );
 }
 export function seriesStreamUrl(a: Account, episodeId: string, ext = "mp4"): string {
-  return `${a.base}/series/${encodeURIComponent(a.username)}/${encodeURIComponent(a.password)}/${episodeId}.${ext}`;
+  return proxiedUrl(
+    `${a.base}/series/${encodeURIComponent(a.username)}/${encodeURIComponent(a.password)}/${episodeId}.${ext}`,
+  );
 }
