@@ -14,6 +14,7 @@ import { Route as MoviesRouteImport } from './routes/movies'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LiveRouteImport } from './routes/live'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MovieIdRouteImport } from './routes/movie.$id'
 import { Route as ApiPublicXtreamRouteImport } from './routes/api/public/xtream'
 
 const SeriesRoute = SeriesRouteImport.update({
@@ -41,6 +42,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MovieIdRoute = MovieIdRouteImport.update({
+  id: '/movie/$id',
+  path: '/movie/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicXtreamRoute = ApiPublicXtreamRouteImport.update({
   id: '/api/public/xtream',
   path: '/api/public/xtream',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/movies': typeof MoviesRoute
   '/series': typeof SeriesRoute
+  '/movie/$id': typeof MovieIdRoute
   '/api/public/xtream': typeof ApiPublicXtreamRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/movies': typeof MoviesRoute
   '/series': typeof SeriesRoute
+  '/movie/$id': typeof MovieIdRoute
   '/api/public/xtream': typeof ApiPublicXtreamRoute
 }
 export interface FileRoutesById {
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/movies': typeof MoviesRoute
   '/series': typeof SeriesRoute
+  '/movie/$id': typeof MovieIdRoute
   '/api/public/xtream': typeof ApiPublicXtreamRoute
 }
 export interface FileRouteTypes {
@@ -80,9 +89,17 @@ export interface FileRouteTypes {
     | '/login'
     | '/movies'
     | '/series'
+    | '/movie/$id'
     | '/api/public/xtream'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/live' | '/login' | '/movies' | '/series' | '/api/public/xtream'
+  to:
+    | '/'
+    | '/live'
+    | '/login'
+    | '/movies'
+    | '/series'
+    | '/movie/$id'
+    | '/api/public/xtream'
   id:
     | '__root__'
     | '/'
@@ -90,6 +107,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/movies'
     | '/series'
+    | '/movie/$id'
     | '/api/public/xtream'
   fileRoutesById: FileRoutesById
 }
@@ -99,6 +117,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MoviesRoute: typeof MoviesRoute
   SeriesRoute: typeof SeriesRoute
+  MovieIdRoute: typeof MovieIdRoute
   ApiPublicXtreamRoute: typeof ApiPublicXtreamRoute
 }
 
@@ -139,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/movie/$id': {
+      id: '/movie/$id'
+      path: '/movie/$id'
+      fullPath: '/movie/$id'
+      preLoaderRoute: typeof MovieIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/xtream': {
       id: '/api/public/xtream'
       path: '/api/public/xtream'
@@ -155,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MoviesRoute: MoviesRoute,
   SeriesRoute: SeriesRoute,
+  MovieIdRoute: MovieIdRoute,
   ApiPublicXtreamRoute: ApiPublicXtreamRoute,
 }
 export const routeTree = rootRouteImport
