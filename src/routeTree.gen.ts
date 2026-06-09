@@ -9,11 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SeriesRouteImport } from './routes/series'
 import { Route as MoviesRouteImport } from './routes/movies'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicXtreamRouteImport } from './routes/api/public/xtream'
 
+const SeriesRoute = SeriesRouteImport.update({
+  id: '/series',
+  path: '/series',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MoviesRoute = MoviesRouteImport.update({
   id: '/movies',
   path: '/movies',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/movies': typeof MoviesRoute
+  '/series': typeof SeriesRoute
   '/api/public/xtream': typeof ApiPublicXtreamRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/movies': typeof MoviesRoute
+  '/series': typeof SeriesRoute
   '/api/public/xtream': typeof ApiPublicXtreamRoute
 }
 export interface FileRoutesById {
@@ -52,25 +60,34 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/movies': typeof MoviesRoute
+  '/series': typeof SeriesRoute
   '/api/public/xtream': typeof ApiPublicXtreamRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/movies' | '/api/public/xtream'
+  fullPaths: '/' | '/login' | '/movies' | '/series' | '/api/public/xtream'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/movies' | '/api/public/xtream'
-  id: '__root__' | '/' | '/login' | '/movies' | '/api/public/xtream'
+  to: '/' | '/login' | '/movies' | '/series' | '/api/public/xtream'
+  id: '__root__' | '/' | '/login' | '/movies' | '/series' | '/api/public/xtream'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   MoviesRoute: typeof MoviesRoute
+  SeriesRoute: typeof SeriesRoute
   ApiPublicXtreamRoute: typeof ApiPublicXtreamRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/series': {
+      id: '/series'
+      path: '/series'
+      fullPath: '/series'
+      preLoaderRoute: typeof SeriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/movies': {
       id: '/movies'
       path: '/movies'
@@ -106,8 +123,19 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   MoviesRoute: MoviesRoute,
+  SeriesRoute: SeriesRoute,
   ApiPublicXtreamRoute: ApiPublicXtreamRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
