@@ -9,38 +9,220 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SeriesRouteImport } from './routes/series'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as MoviesRouteImport } from './routes/movies'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as LiveRouteImport } from './routes/live'
+import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SeriesIdRouteImport } from './routes/series.$id'
+import { Route as MovieIdRouteImport } from './routes/movie.$id'
+import { Route as ApiPublicXtreamRouteImport } from './routes/api/public/xtream'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SeriesRoute = SeriesRouteImport.update({
+  id: '/series',
+  path: '/series',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MoviesRoute = MoviesRouteImport.update({
+  id: '/movies',
+  path: '/movies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LiveRoute = LiveRouteImport.update({
+  id: '/live',
+  path: '/live',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FavoritesRoute = FavoritesRouteImport.update({
+  id: '/favorites',
+  path: '/favorites',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SeriesIdRoute = SeriesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => SeriesRoute,
+} as any)
+const MovieIdRoute = MovieIdRouteImport.update({
+  id: '/movie/$id',
+  path: '/movie/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicXtreamRoute = ApiPublicXtreamRouteImport.update({
+  id: '/api/public/xtream',
+  path: '/api/public/xtream',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/favorites': typeof FavoritesRoute
+  '/live': typeof LiveRoute
+  '/login': typeof LoginRoute
+  '/movies': typeof MoviesRoute
+  '/search': typeof SearchRoute
+  '/series': typeof SeriesRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/movie/$id': typeof MovieIdRoute
+  '/series/$id': typeof SeriesIdRoute
+  '/api/public/xtream': typeof ApiPublicXtreamRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/favorites': typeof FavoritesRoute
+  '/live': typeof LiveRoute
+  '/login': typeof LoginRoute
+  '/movies': typeof MoviesRoute
+  '/search': typeof SearchRoute
+  '/series': typeof SeriesRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/movie/$id': typeof MovieIdRoute
+  '/series/$id': typeof SeriesIdRoute
+  '/api/public/xtream': typeof ApiPublicXtreamRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/favorites': typeof FavoritesRoute
+  '/live': typeof LiveRoute
+  '/login': typeof LoginRoute
+  '/movies': typeof MoviesRoute
+  '/search': typeof SearchRoute
+  '/series': typeof SeriesRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/movie/$id': typeof MovieIdRoute
+  '/series/$id': typeof SeriesIdRoute
+  '/api/public/xtream': typeof ApiPublicXtreamRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/favorites'
+    | '/live'
+    | '/login'
+    | '/movies'
+    | '/search'
+    | '/series'
+    | '/sitemap.xml'
+    | '/movie/$id'
+    | '/series/$id'
+    | '/api/public/xtream'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/favorites'
+    | '/live'
+    | '/login'
+    | '/movies'
+    | '/search'
+    | '/series'
+    | '/sitemap.xml'
+    | '/movie/$id'
+    | '/series/$id'
+    | '/api/public/xtream'
+  id:
+    | '__root__'
+    | '/'
+    | '/favorites'
+    | '/live'
+    | '/login'
+    | '/movies'
+    | '/search'
+    | '/series'
+    | '/sitemap.xml'
+    | '/movie/$id'
+    | '/series/$id'
+    | '/api/public/xtream'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  FavoritesRoute: typeof FavoritesRoute
+  LiveRoute: typeof LiveRoute
+  LoginRoute: typeof LoginRoute
+  MoviesRoute: typeof MoviesRoute
+  SearchRoute: typeof SearchRoute
+  SeriesRoute: typeof SeriesRouteWithChildren
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  MovieIdRoute: typeof MovieIdRoute
+  ApiPublicXtreamRoute: typeof ApiPublicXtreamRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/series': {
+      id: '/series'
+      path: '/series'
+      fullPath: '/series'
+      preLoaderRoute: typeof SeriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/movies': {
+      id: '/movies'
+      path: '/movies'
+      fullPath: '/movies'
+      preLoaderRoute: typeof MoviesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/live': {
+      id: '/live'
+      path: '/live'
+      fullPath: '/live'
+      preLoaderRoute: typeof LiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favorites': {
+      id: '/favorites'
+      path: '/favorites'
+      fullPath: '/favorites'
+      preLoaderRoute: typeof FavoritesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +230,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/series/$id': {
+      id: '/series/$id'
+      path: '/$id'
+      fullPath: '/series/$id'
+      preLoaderRoute: typeof SeriesIdRouteImport
+      parentRoute: typeof SeriesRoute
+    }
+    '/movie/$id': {
+      id: '/movie/$id'
+      path: '/movie/$id'
+      fullPath: '/movie/$id'
+      preLoaderRoute: typeof MovieIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/xtream': {
+      id: '/api/public/xtream'
+      path: '/api/public/xtream'
+      fullPath: '/api/public/xtream'
+      preLoaderRoute: typeof ApiPublicXtreamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface SeriesRouteChildren {
+  SeriesIdRoute: typeof SeriesIdRoute
+}
+
+const SeriesRouteChildren: SeriesRouteChildren = {
+  SeriesIdRoute: SeriesIdRoute,
+}
+
+const SeriesRouteWithChildren =
+  SeriesRoute._addFileChildren(SeriesRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  FavoritesRoute: FavoritesRoute,
+  LiveRoute: LiveRoute,
+  LoginRoute: LoginRoute,
+  MoviesRoute: MoviesRoute,
+  SearchRoute: SearchRoute,
+  SeriesRoute: SeriesRouteWithChildren,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  MovieIdRoute: MovieIdRoute,
+  ApiPublicXtreamRoute: ApiPublicXtreamRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
