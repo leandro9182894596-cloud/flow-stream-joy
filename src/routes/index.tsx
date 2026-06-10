@@ -105,6 +105,10 @@ function HomePage() {
       )}
 
       <div className="space-y-10 px-4 py-8 lg:px-12">
+        {/* Ad banner */}
+        {settings.banner && <AdBanner image={settings.banner} link={settings.bannerLink} />}
+
+
         {/* Continue watching */}
         {progress.length > 0 && (
           <Row title="Continuar assistindo" icon={<History className="h-5 w-5 text-primary" />}>
