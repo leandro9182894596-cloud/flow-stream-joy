@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { Play, Info, Loader2, History, X } from "lucide-react";
+import { motion } from "framer-motion";
 import { AppShell } from "../components/AppShell";
 import { ContentCard } from "../components/ContentCard";
 import { useRequireAccount } from "../hooks/use-require-account";
+import { useSettings } from "../hooks/use-settings";
 import { useCachedQuery, accountKey } from "../lib/queries";
 import { getVodStreams, getSeries, getLiveStreams } from "../lib/xtream";
 import { loadProgress, removeProgress, type ProgressEntry } from "../lib/storage";
@@ -22,6 +24,7 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const { account, ready } = useRequireAccount();
   const key = accountKey(account);
+  const settings = useSettings();
 
   const movies = useCachedQuery(`${key}:vod:all`, () => getVodStreams(account!), { enabled: !!account });
   const series = useCachedQuery(`${key}:series:all`, () => getSeries(account!), { enabled: !!account });
@@ -38,6 +41,10 @@ function HomePage() {
     return withImg.length ? withImg[Math.floor(Math.random() * Math.min(withImg.length, 30))] : list[0];
   }, [movies.data]);
 
+  // Preload buffer: how many of the core catalogs are ready
+  const readyCount = [movies.data, series.data, live.data].filter(Boolean).length;
+  const preloading = !!account && readyCount < 3 && (movies.isLoading || series.isLoading || live.isLoading);
+
   if (!ready || !account) {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
@@ -45,6 +52,11 @@ function HomePage() {
       </div>
     );
   }
+
+  if (preloading) {
+    return <SplashPreloader logo={settings.logo} background={settings.background} ready={readyCount} total={3} />;
+  }
+
 
   const removeFromHistory = (k: string) => {
     removeProgress(k);
@@ -93,6 +105,10 @@ function HomePage() {
       )}
 
       <div className="space-y-10 px-4 py-8 lg:px-12">
+        {/* Ad banner */}
+        {settings.banner && <AdBanner image={settings.banner} link={settings.bannerLink} />}
+
+
         {/* Continue watching */}
         {progress.length > 0 && (
           <Row title="Continuar assistindo" icon={<History className="h-5 w-5 text-primary" />}>
@@ -244,3 +260,81 @@ function RowSection({
     </section>
   );
 }
+
+function AdBanner({ image, link }: { image: string; link?: string }) {
+  const content = (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4 }}
+      className="relative overflow-hidden rounded-2xl border border-border shadow-card"
+    >
+      <span className="absolute left-3 top-3 z-10 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/90">
+        Anúncio
+      </span>
+      <img src={image} alt="Anúncio" className="max-h-64 w-full object-cover" loading="lazy" />
+    </motion.div>
+  );
+  if (link) {
+    return (
+      <a href={link} target="_blank" rel="noopener noreferrer" className="focusable block">
+        {content}
+      </a>
+    );
+  }
+  return content;
+}
+
+function SplashPreloader({
+  logo,
+  background,
+  ready,
+  total,
+}: {
+  logo?: string;
+  background?: string;
+  ready: number;
+  total: number;
+}) {
+  const pct = Math.round((ready / total) * 100);
+  return (
+    <div className="relative grid min-h-screen place-items-center overflow-hidden bg-background px-6">
+      {background && (
+        <div className="pointer-events-none absolute inset-0">
+          <img src={background} alt="" className="h-full w-full object-cover opacity-20" />
+          <div className="absolute inset-0 bg-background/85" />
+        </div>
+      )}
+      <div className="pointer-events-none absolute -left-40 top-0 h-96 w-96 rounded-full bg-primary/20 blur-3xl" />
+      <div className="pointer-events-none absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-accent/20 blur-3xl" />
+
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="relative z-10 flex w-full max-w-sm flex-col items-center text-center"
+      >
+        {logo ? (
+          <img src={logo} alt="Logo" className="mb-6 h-20 w-auto max-w-[220px] object-contain" />
+        ) : (
+          <h1 className="mb-6 font-display text-4xl font-extrabold tracking-tight">
+            FLOW<span className="text-gradient">TV</span>
+          </h1>
+        )}
+        <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
+          <motion.div
+            className="h-full rounded-full bg-gradient-primary"
+            initial={{ width: 0 }}
+            animate={{ width: `${pct}%` }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          />
+        </div>
+        <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+          Carregando seu catálogo… {pct}%
+        </p>
+      </motion.div>
+    </div>
+  );
+}
+

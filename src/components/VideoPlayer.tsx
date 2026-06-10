@@ -40,6 +40,18 @@ interface TrackOption {
 
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
+// Map a stream height/bitrate to a friendly quality label (SD / HD / FHD / 4K).
+function qualityLabel(height?: number, bitrate?: number): string {
+  const h = height || 0;
+  if (h >= 2160) return "4K";
+  if (h >= 1440) return "2K";
+  if (h >= 1080) return "FHD";
+  if (h >= 720) return "HD";
+  if (h > 0) return "SD";
+  const kbps = Math.round((bitrate || 0) / 1000);
+  return kbps ? `${kbps}kbps` : "Auto";
+}
+
 function formatTime(s: number): string {
   if (!Number.isFinite(s) || s < 0) return "0:00";
   const h = Math.floor(s / 3600);
@@ -140,7 +152,7 @@ export function VideoPlayer({
             setLevels(
               hls.levels.map((l, i) => ({
                 id: i,
-                label: l.height ? `${l.height}p` : `${Math.round((l.bitrate || 0) / 1000)}kbps`,
+                label: qualityLabel(l.height, l.bitrate),
               })),
             );
             setLoading(false);

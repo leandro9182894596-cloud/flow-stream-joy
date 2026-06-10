@@ -1,7 +1,9 @@
 import { type ReactNode } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Tv, Film, MonitorPlay, Clapperboard, LogOut, Search, Heart } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useAccount } from "../hooks/use-account";
+import { useSettings } from "../hooks/use-settings";
 
 const NAV: { to: string; label: string; icon: typeof Tv; exact?: boolean }[] = [
   { to: "/", label: "Início", icon: MonitorPlay, exact: true },
@@ -15,6 +17,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { userInfo, logout } = useAccount();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const settings = useSettings();
 
   const handleLogout = () => {
     logout();
@@ -22,7 +25,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="relative flex min-h-screen bg-background">
+      {settings.background && (
+        <div className="pointer-events-none fixed inset-0 z-0">
+          <img src={settings.background} alt="" className="h-full w-full object-cover opacity-20" />
+          <div className="absolute inset-0 bg-background/80" />
+        </div>
+      )}
+      <div className="relative z-10 flex min-h-screen w-full">
       {/* Sidebar (desktop) */}
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar p-4 lg:flex">
         <Brand />
@@ -81,7 +91,19 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="sm:hidden">Buscar</span>
           </Link>
         </header>
-        <main className="flex-1">{children}</main>
+        <main className="flex-1">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
+        </main>
       </div>
 
       {/* Bottom nav (mobile) */}
@@ -102,25 +124,32 @@ export function AppShell({ children }: { children: ReactNode }) {
           );
         })}
       </nav>
+      </div>
     </div>
   );
 }
 
 function Brand({ compact = false }: { compact?: boolean }) {
+  const settings = useSettings();
   return (
     <Link to="/" className="focusable flex items-center gap-2.5">
-      <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-primary text-primary-foreground shadow-glow">
-        <MonitorPlay className="h-5 w-5" />
-      </span>
-      {!compact && (
-        <span className="font-display text-xl font-extrabold tracking-tight">
-          FLOW<span className="text-gradient">TV</span>
-        </span>
-      )}
-      {compact && (
-        <span className="font-display text-lg font-extrabold tracking-tight">
-          FLOW<span className="text-gradient">TV</span>
-        </span>
+      {settings.logo ? (
+        <img
+          src={settings.logo}
+          alt="Logo"
+          className={`${compact ? "h-8" : "h-9"} w-auto max-w-[160px] object-contain`}
+        />
+      ) : (
+        <>
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-primary text-primary-foreground shadow-glow">
+            <MonitorPlay className="h-5 w-5" />
+          </span>
+          <span
+            className={`font-display ${compact ? "text-lg" : "text-xl"} font-extrabold tracking-tight`}
+          >
+            FLOW<span className="text-gradient">TV</span>
+          </span>
+        </>
       )}
     </Link>
   );
