@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { Play, Info, Loader2, History, X } from "lucide-react";
+import { Play, Info, Loader2, History, X, Check, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { AppShell } from "../components/AppShell";
 import { ContentCard } from "../components/ContentCard";
