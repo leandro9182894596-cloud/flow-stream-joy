@@ -17,6 +17,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { userInfo, logout } = useAccount();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const settings = useSettings();
 
   const handleLogout = () => {
     logout();
@@ -24,7 +25,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="relative flex min-h-screen bg-background">
+      {settings.background && (
+        <div className="pointer-events-none fixed inset-0 z-0">
+          <img src={settings.background} alt="" className="h-full w-full object-cover opacity-20" />
+          <div className="absolute inset-0 bg-background/80" />
+        </div>
+      )}
+      <div className="relative z-10 flex min-h-screen w-full">
       {/* Sidebar (desktop) */}
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar p-4 lg:flex">
         <Brand />
