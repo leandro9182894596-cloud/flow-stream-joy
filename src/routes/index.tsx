@@ -291,18 +291,25 @@ function AdBanner({ image, link }: { image: string; link?: string }) {
   return content;
 }
 
+interface PreloadStep {
+  label: string;
+  done: boolean;
+  error: boolean;
+}
+
 function SplashPreloader({
   logo,
   background,
-  ready,
-  total,
+  steps,
 }: {
   logo?: string;
   background?: string;
-  ready: number;
-  total: number;
+  steps: PreloadStep[];
 }) {
-  const pct = Math.round((ready / total) * 100);
+  const settled = steps.filter((s) => s.done || s.error).length;
+  const pct = Math.round((settled / steps.length) * 100);
+  const activeIndex = steps.findIndex((s) => !s.done && !s.error);
+
   return (
     <div className="relative grid min-h-screen place-items-center overflow-hidden bg-background px-6">
       {background && (
@@ -327,6 +334,7 @@ function SplashPreloader({
             FLOW<span className="text-gradient">TV</span>
           </h1>
         )}
+
         <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
           <motion.div
             className="h-full rounded-full bg-gradient-primary"
@@ -335,12 +343,47 @@ function SplashPreloader({
             transition={{ duration: 0.5, ease: "easeOut" }}
           />
         </div>
-        <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin text-primary" />
-          Carregando seu catálogo… {pct}%
-        </p>
+        <p className="mt-3 text-sm text-muted-foreground">Carregando seu catálogo… {pct}%</p>
+
+        {/* Per-step progress */}
+        <ul className="mt-6 w-full space-y-2 text-left">
+          {steps.map((step, i) => {
+            const isActive = i === activeIndex;
+            return (
+              <li
+                key={step.label}
+                className={`flex items-center gap-3 rounded-xl border px-4 py-2.5 text-sm transition-colors ${
+                  step.done
+                    ? "border-primary/40 bg-primary/10 text-foreground"
+                    : step.error
+                      ? "border-destructive/40 bg-destructive/10 text-foreground"
+                      : isActive
+                        ? "border-border bg-card/70 text-foreground"
+                        : "border-border/60 bg-card/30 text-muted-foreground"
+                }`}
+              >
+                <span className="grid h-6 w-6 shrink-0 place-items-center">
+                  {step.done ? (
+                    <Check className="h-5 w-5 text-primary" />
+                  ) : step.error ? (
+                    <AlertCircle className="h-5 w-5 text-destructive" />
+                  ) : isActive ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  ) : (
+                    <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
+                  )}
+                </span>
+                <span className="flex-1 font-medium">{step.label}</span>
+                <span className="text-xs text-muted-foreground">
+                  {step.done ? "Pronto" : step.error ? "Falhou" : isActive ? "Carregando…" : "Aguardando"}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
       </motion.div>
     </div>
   );
 }
+
 
