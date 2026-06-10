@@ -1,7 +1,9 @@
 import { type ReactNode } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Tv, Film, MonitorPlay, Clapperboard, LogOut, Search, Heart } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useAccount } from "../hooks/use-account";
+import { useSettings } from "../hooks/use-settings";
 
 const NAV: { to: string; label: string; icon: typeof Tv; exact?: boolean }[] = [
   { to: "/", label: "Início", icon: MonitorPlay, exact: true },
