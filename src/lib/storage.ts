@@ -63,6 +63,33 @@ export function clearDns() {
   localStorage.removeItem(DNS_KEY);
 }
 
+// ---------- App appearance settings (admin) ----------
+const SETTINGS_KEY = "flowtv.settings";
+
+export interface AppSettings {
+  logo?: string; // data URL or remote URL
+  background?: string; // data URL or remote URL
+  banner?: string; // ad banner image
+  bannerLink?: string; // optional click-through URL
+}
+
+export const SETTINGS_EVENT = "flowtv:settings";
+
+export function loadSettings(): AppSettings {
+  if (!isBrowser) return {};
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    return raw ? (JSON.parse(raw) as AppSettings) : {};
+  } catch {
+    return {};
+  }
+}
+export function saveSettings(settings: AppSettings) {
+  if (!isBrowser) return;
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  window.dispatchEvent(new Event(SETTINGS_EVENT));
+}
+
 // ---------- Cache (TTL) ----------
 export function getCache<T>(key: string, maxAgeMs: number): T | null {
   if (!isBrowser) return null;
