@@ -140,7 +140,7 @@ export function VideoPlayer({
             setLevels(
               hls.levels.map((l, i) => ({
                 id: i,
-                label: l.height ? `${l.height}p` : `${Math.round((l.bitrate || 0) / 1000)}kbps`,
+                label: qualityLabel(l.height, l.bitrate),
               })),
             );
             setLoading(false);
