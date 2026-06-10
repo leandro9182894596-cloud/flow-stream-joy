@@ -41,9 +41,15 @@ function HomePage() {
     return withImg.length ? withImg[Math.floor(Math.random() * Math.min(withImg.length, 30))] : list[0];
   }, [movies.data]);
 
-  // Preload buffer: how many of the core catalogs are ready
-  const readyCount = [movies.data, series.data, live.data].filter(Boolean).length;
-  const preloading = !!account && readyCount < 3 && (movies.isLoading || series.isLoading || live.isLoading);
+  // Preload buffer: fetch movies, series and live TV in parallel and report
+  // per-step progress before releasing the app.
+  const steps: PreloadStep[] = [
+    { label: "Filmes", done: !!movies.data, error: !!movies.error },
+    { label: "Séries", done: !!series.data, error: !!series.error },
+    { label: "TV ao Vivo", done: !!live.data, error: !!live.error },
+  ];
+  const settled = steps.filter((s) => s.done || s.error).length;
+  const preloading = !!account && settled < steps.length;
 
   if (!ready || !account) {
     return (
@@ -54,7 +60,7 @@ function HomePage() {
   }
 
   if (preloading) {
-    return <SplashPreloader logo={settings.logo} background={settings.background} ready={readyCount} total={3} />;
+    return <SplashPreloader logo={settings.logo} background={settings.background} steps={steps} />;
   }
 
 
