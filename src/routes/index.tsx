@@ -260,3 +260,81 @@ function RowSection({
     </section>
   );
 }
+
+function AdBanner({ image, link }: { image: string; link?: string }) {
+  const content = (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4 }}
+      className="relative overflow-hidden rounded-2xl border border-border shadow-card"
+    >
+      <span className="absolute left-3 top-3 z-10 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/90">
+        Anúncio
+      </span>
+      <img src={image} alt="Anúncio" className="max-h-64 w-full object-cover" loading="lazy" />
+    </motion.div>
+  );
+  if (link) {
+    return (
+      <a href={link} target="_blank" rel="noopener noreferrer" className="focusable block">
+        {content}
+      </a>
+    );
+  }
+  return content;
+}
+
+function SplashPreloader({
+  logo,
+  background,
+  ready,
+  total,
+}: {
+  logo?: string;
+  background?: string;
+  ready: number;
+  total: number;
+}) {
+  const pct = Math.round((ready / total) * 100);
+  return (
+    <div className="relative grid min-h-screen place-items-center overflow-hidden bg-background px-6">
+      {background && (
+        <div className="pointer-events-none absolute inset-0">
+          <img src={background} alt="" className="h-full w-full object-cover opacity-20" />
+          <div className="absolute inset-0 bg-background/85" />
+        </div>
+      )}
+      <div className="pointer-events-none absolute -left-40 top-0 h-96 w-96 rounded-full bg-primary/20 blur-3xl" />
+      <div className="pointer-events-none absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-accent/20 blur-3xl" />
+
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="relative z-10 flex w-full max-w-sm flex-col items-center text-center"
+      >
+        {logo ? (
+          <img src={logo} alt="Logo" className="mb-6 h-20 w-auto max-w-[220px] object-contain" />
+        ) : (
+          <h1 className="mb-6 font-display text-4xl font-extrabold tracking-tight">
+            FLOW<span className="text-gradient">TV</span>
+          </h1>
+        )}
+        <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
+          <motion.div
+            className="h-full rounded-full bg-gradient-primary"
+            initial={{ width: 0 }}
+            animate={{ width: `${pct}%` }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          />
+        </div>
+        <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+          Carregando seu catálogo… {pct}%
+        </p>
+      </motion.div>
+    </div>
+  );
+}
+
