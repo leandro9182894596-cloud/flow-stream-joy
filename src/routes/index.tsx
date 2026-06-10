@@ -24,6 +24,7 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const { account, ready } = useRequireAccount();
   const key = accountKey(account);
+  const settings = useSettings();
 
   const movies = useCachedQuery(`${key}:vod:all`, () => getVodStreams(account!), { enabled: !!account });
   const series = useCachedQuery(`${key}:series:all`, () => getSeries(account!), { enabled: !!account });
@@ -40,6 +41,10 @@ function HomePage() {
     return withImg.length ? withImg[Math.floor(Math.random() * Math.min(withImg.length, 30))] : list[0];
   }, [movies.data]);
 
+  // Preload buffer: how many of the core catalogs are ready
+  const readyCount = [movies.data, series.data, live.data].filter(Boolean).length;
+  const preloading = !!account && readyCount < 3 && (movies.isLoading || series.isLoading || live.isLoading);
+
   if (!ready || !account) {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
@@ -47,6 +52,11 @@ function HomePage() {
       </div>
     );
   }
+
+  if (preloading) {
+    return <SplashPreloader logo={settings.logo} background={settings.background} ready={readyCount} total={3} />;
+  }
+
 
   const removeFromHistory = (k: string) => {
     removeProgress(k);
