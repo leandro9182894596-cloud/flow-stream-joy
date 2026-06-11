@@ -422,8 +422,15 @@ export function VideoPlayer({
       hlsRef.current.currentLevel = id; // -1 = auto
       setCurrentLevel(id);
     }
+    try {
+      const height = id === -1 ? "auto" : String(levels.find((l) => l.id === id)?.height ?? "auto");
+      localStorage.setItem(QUALITY_PREF_KEY, height);
+    } catch {
+      /* ignore */
+    }
     setMenu(null);
   };
+
   const selectAudio = (id: number) => {
     if (hlsRef.current) hlsRef.current.audioTrack = id;
     setMenu(null);
