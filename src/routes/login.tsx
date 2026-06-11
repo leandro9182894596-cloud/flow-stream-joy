@@ -20,6 +20,7 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const navigate = useNavigate();
   const { login, account, ready } = useAccount();
+  const settings = useSettings();
   const [dns, setDns] = useState<string | null>(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
