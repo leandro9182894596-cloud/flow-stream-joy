@@ -660,9 +660,13 @@ export function VideoPlayer({
                     title="Qualidade"
                     onBack={() => setMenu("main")}
                     options={[
-                      { id: -1, label: "Auto", active: currentLevel === -1 },
-                      ...levels.map((l) => ({ id: l.id, label: l.label, active: l.id === currentLevel })),
+                      { id: -1, label: "Automático (Recomendado)", active: currentLevel === -1 },
+                      ...levels
+                        .slice()
+                        .sort((a, b) => (b.height || 0) - (a.height || 0))
+                        .map((l) => ({ id: l.id, label: l.label, active: l.id === currentLevel })),
                     ]}
+
                     onSelect={(id) => selectLevel(id)}
                   />
                 )}
