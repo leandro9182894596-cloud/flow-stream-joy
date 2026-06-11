@@ -36,21 +36,36 @@ interface VideoPlayerProps {
 interface TrackOption {
   id: number;
   label: string;
+  height?: number;
 }
 
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
-// Map a stream height/bitrate to a friendly quality label (SD / HD / FHD / 4K).
+const QUALITY_PREF_KEY = "flowtv:quality";
+
+// Map a stream height to a friendly streaming-style label.
 function qualityLabel(height?: number, bitrate?: number): string {
   const h = height || 0;
   if (h >= 2160) return "4K";
   if (h >= 1440) return "2K";
-  if (h >= 1080) return "FHD";
-  if (h >= 720) return "HD";
-  if (h > 0) return "SD";
+  if (h >= 1080) return "Full HD 1080p";
+  if (h >= 720) return "HD 720p";
+  if (h > 0) return "SD 480p";
   const kbps = Math.round((bitrate || 0) / 1000);
   return kbps ? `${kbps}kbps` : "Auto";
 }
+
+// Short badge label (e.g. "1080p", "4K") for the on-screen indicator.
+function shortQuality(height?: number): string {
+  const h = height || 0;
+  if (h >= 2160) return "4K";
+  if (h >= 1440) return "2K";
+  if (h >= 1080) return "1080p";
+  if (h >= 720) return "720p";
+  if (h > 0) return "480p";
+  return "";
+}
+
 
 function formatTime(s: number): string {
   if (!Number.isFinite(s) || s < 0) return "0:00";
