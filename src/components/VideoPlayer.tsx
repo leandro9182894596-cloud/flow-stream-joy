@@ -169,13 +169,30 @@ export function VideoPlayer({
               hls.levels.map((l, i) => ({
                 id: i,
                 label: qualityLabel(l.height, l.bitrate),
+                height: l.height,
               })),
             );
+            // Apply saved quality preference (match by resolution height).
+            try {
+              const pref = localStorage.getItem(QUALITY_PREF_KEY);
+              if (pref && pref !== "auto") {
+                const idx = hls.levels.findIndex((l) => l.height === Number(pref));
+                if (idx >= 0) {
+                  hls.currentLevel = idx;
+                  setCurrentLevel(idx);
+                }
+              }
+            } catch {
+              /* ignore */
+            }
             setLoading(false);
             seekToStart();
             if (autoPlay) video!.play().catch(() => setPlaying(false));
           });
-          hls.on(HlsMod.Events.LEVEL_SWITCHED, (_e, d) => setCurrentLevel(hls.autoLevelEnabled ? -1 : d.level));
+          hls.on(HlsMod.Events.LEVEL_SWITCHED, (_e, d) => {
+            setCurrentLevel(hls.autoLevelEnabled ? -1 : d.level);
+            setActiveHeight(hls.levels[d.level]?.height || 0);
+          });
           hls.on(HlsMod.Events.AUDIO_TRACKS_UPDATED, () => {
             setAudioTracks(hls.audioTracks.map((t, i) => ({ id: i, label: t.name || t.lang || `Áudio ${i + 1}` })));
           });
