@@ -36,21 +36,36 @@ interface VideoPlayerProps {
 interface TrackOption {
   id: number;
   label: string;
+  height?: number;
 }
 
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
-// Map a stream height/bitrate to a friendly quality label (SD / HD / FHD / 4K).
+const QUALITY_PREF_KEY = "flowtv:quality";
+
+// Map a stream height to a friendly streaming-style label.
 function qualityLabel(height?: number, bitrate?: number): string {
   const h = height || 0;
   if (h >= 2160) return "4K";
   if (h >= 1440) return "2K";
-  if (h >= 1080) return "FHD";
-  if (h >= 720) return "HD";
-  if (h > 0) return "SD";
+  if (h >= 1080) return "Full HD 1080p";
+  if (h >= 720) return "HD 720p";
+  if (h > 0) return "SD 480p";
   const kbps = Math.round((bitrate || 0) / 1000);
   return kbps ? `${kbps}kbps` : "Auto";
 }
+
+// Short badge label (e.g. "1080p", "4K") for the on-screen indicator.
+function shortQuality(height?: number): string {
+  const h = height || 0;
+  if (h >= 2160) return "4K";
+  if (h >= 1440) return "2K";
+  if (h >= 1080) return "1080p";
+  if (h >= 720) return "720p";
+  if (h > 0) return "480p";
+  return "";
+}
+
 
 function formatTime(s: number): string {
   if (!Number.isFinite(s) || s < 0) return "0:00";
@@ -94,6 +109,7 @@ export function VideoPlayer({
   const [menu, setMenu] = useState<null | "main" | "quality" | "audio" | "subs" | "speed">(null);
   const [levels, setLevels] = useState<TrackOption[]>([]);
   const [currentLevel, setCurrentLevel] = useState(-1); // -1 = auto
+  const [activeHeight, setActiveHeight] = useState(0); // resolution actually playing
   const [audioTracks, setAudioTracks] = useState<TrackOption[]>([]);
   const [currentAudio, setCurrentAudio] = useState(-1);
   const [subTracks, setSubTracks] = useState<TrackOption[]>([]);
@@ -153,13 +169,30 @@ export function VideoPlayer({
               hls.levels.map((l, i) => ({
                 id: i,
                 label: qualityLabel(l.height, l.bitrate),
+                height: l.height,
               })),
             );
+            // Apply saved quality preference (match by resolution height).
+            try {
+              const pref = localStorage.getItem(QUALITY_PREF_KEY);
+              if (pref && pref !== "auto") {
+                const idx = hls.levels.findIndex((l) => l.height === Number(pref));
+                if (idx >= 0) {
+                  hls.currentLevel = idx;
+                  setCurrentLevel(idx);
+                }
+              }
+            } catch {
+              /* ignore */
+            }
             setLoading(false);
             seekToStart();
             if (autoPlay) video!.play().catch(() => setPlaying(false));
           });
-          hls.on(HlsMod.Events.LEVEL_SWITCHED, (_e, d) => setCurrentLevel(hls.autoLevelEnabled ? -1 : d.level));
+          hls.on(HlsMod.Events.LEVEL_SWITCHED, (_e, d) => {
+            setCurrentLevel(hls.autoLevelEnabled ? -1 : d.level);
+            setActiveHeight(hls.levels[d.level]?.height || 0);
+          });
           hls.on(HlsMod.Events.AUDIO_TRACKS_UPDATED, () => {
             setAudioTracks(hls.audioTracks.map((t, i) => ({ id: i, label: t.name || t.lang || `Áudio ${i + 1}` })));
           });
@@ -389,8 +422,15 @@ export function VideoPlayer({
       hlsRef.current.currentLevel = id; // -1 = auto
       setCurrentLevel(id);
     }
+    try {
+      const height = id === -1 ? "auto" : String(levels.find((l) => l.id === id)?.height ?? "auto");
+      localStorage.setItem(QUALITY_PREF_KEY, height);
+    } catch {
+      /* ignore */
+    }
     setMenu(null);
   };
+
   const selectAudio = (id: number) => {
     if (hlsRef.current) hlsRef.current.audioTrack = id;
     setMenu(null);
@@ -520,8 +560,19 @@ export function VideoPlayer({
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" /> AO VIVO
             </span>
             <Wifi className="h-3.5 w-3.5 text-primary" />
+            {levels.length > 0 && (
+              <span className="flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-semibold text-foreground">
+                {currentLevel === -1 && (
+                  <span className="rounded bg-primary px-1 text-[10px] font-bold text-primary-foreground">AUTO</span>
+                )}
+                {currentLevel === -1
+                  ? shortQuality(activeHeight) || "Auto"
+                  : levels.find((l) => l.id === currentLevel)?.label || "Auto"}
+              </span>
+            )}
           </div>
         )}
+
 
         <div className="flex items-center gap-1">
           <CtrlButton onClick={togglePlay} label={playing ? "Pausar" : "Reproduzir"}>
@@ -571,9 +622,14 @@ export function VideoPlayer({
                     {levels.length > 0 && (
                       <MenuRow
                         label="Qualidade"
-                        value={currentLevel === -1 ? "Auto" : levels.find((l) => l.id === currentLevel)?.label || "Auto"}
+                        value={
+                          currentLevel === -1
+                            ? `Auto${shortQuality(activeHeight) ? ` · ${shortQuality(activeHeight)}` : ""}`
+                            : levels.find((l) => l.id === currentLevel)?.label || "Auto"
+                        }
                         onClick={() => setMenu("quality")}
                       />
+
                     )}
                     {audioTracks.length > 1 && (
                       <MenuRow
@@ -604,9 +660,13 @@ export function VideoPlayer({
                     title="Qualidade"
                     onBack={() => setMenu("main")}
                     options={[
-                      { id: -1, label: "Auto", active: currentLevel === -1 },
-                      ...levels.map((l) => ({ id: l.id, label: l.label, active: l.id === currentLevel })),
+                      { id: -1, label: "Automático (Recomendado)", active: currentLevel === -1 },
+                      ...levels
+                        .slice()
+                        .sort((a, b) => (b.height || 0) - (a.height || 0))
+                        .map((l) => ({ id: l.id, label: l.label, active: l.id === currentLevel })),
                     ]}
+
                     onSelect={(id) => selectLevel(id)}
                   />
                 )}
