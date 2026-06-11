@@ -622,9 +622,14 @@ export function VideoPlayer({
                     {levels.length > 0 && (
                       <MenuRow
                         label="Qualidade"
-                        value={currentLevel === -1 ? "Auto" : levels.find((l) => l.id === currentLevel)?.label || "Auto"}
+                        value={
+                          currentLevel === -1
+                            ? `Auto${shortQuality(activeHeight) ? ` · ${shortQuality(activeHeight)}` : ""}`
+                            : levels.find((l) => l.id === currentLevel)?.label || "Auto"
+                        }
                         onClick={() => setMenu("quality")}
                       />
+
                     )}
                     {audioTracks.length > 1 && (
                       <MenuRow
