@@ -560,8 +560,19 @@ export function VideoPlayer({
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" /> AO VIVO
             </span>
             <Wifi className="h-3.5 w-3.5 text-primary" />
+            {levels.length > 0 && (
+              <span className="flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-semibold text-foreground">
+                {currentLevel === -1 && (
+                  <span className="rounded bg-primary px-1 text-[10px] font-bold text-primary-foreground">AUTO</span>
+                )}
+                {currentLevel === -1
+                  ? shortQuality(activeHeight) || "Auto"
+                  : levels.find((l) => l.id === currentLevel)?.label || "Auto"}
+              </span>
+            )}
           </div>
         )}
+
 
         <div className="flex items-center gap-1">
           <CtrlButton onClick={togglePlay} label={playing ? "Pausar" : "Reproduzir"}>
