@@ -109,6 +109,7 @@ export function VideoPlayer({
   const [menu, setMenu] = useState<null | "main" | "quality" | "audio" | "subs" | "speed">(null);
   const [levels, setLevels] = useState<TrackOption[]>([]);
   const [currentLevel, setCurrentLevel] = useState(-1); // -1 = auto
+  const [activeHeight, setActiveHeight] = useState(0); // resolution actually playing
   const [audioTracks, setAudioTracks] = useState<TrackOption[]>([]);
   const [currentAudio, setCurrentAudio] = useState(-1);
   const [subTracks, setSubTracks] = useState<TrackOption[]>([]);
