@@ -9,7 +9,7 @@ import { getSeriesCategories, getSeries } from "../lib/xtream";
 import { CategoryBar } from "../components/CategoryBar";
 import { Grid } from "./movies";
 
-export const Route = createFileRoute("/series")({
+export const Route = createFileRoute("/series/")({
   head: () => ({
     meta: [
       { title: "Séries — FLOW TV" },
