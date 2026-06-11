@@ -69,9 +69,9 @@ const SeriesIndexRoute = SeriesIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const SeriesIdRoute = SeriesIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => SeriesRoute,
+  id: '/series/$id',
+  path: '/series/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const MovieIdRoute = MovieIdRouteImport.update({
   id: '/movie/$id',
@@ -193,6 +193,7 @@ export interface RootRouteChildren {
   SearchRoute: typeof SearchRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   MovieIdRoute: typeof MovieIdRoute
+  SeriesIdRoute: typeof SeriesIdRoute
   SeriesIndexRoute: typeof SeriesIndexRoute
   ApiPublicStreamRoute: typeof ApiPublicStreamRoute
   ApiPublicXtreamRoute: typeof ApiPublicXtreamRoute
@@ -265,10 +266,10 @@ declare module '@tanstack/react-router' {
     }
     '/series/$id': {
       id: '/series/$id'
-      path: '/$id'
+      path: '/series/$id'
       fullPath: '/series/$id'
       preLoaderRoute: typeof SeriesIdRouteImport
-      parentRoute: typeof SeriesRoute
+      parentRoute: typeof rootRouteImport
     }
     '/movie/$id': {
       id: '/movie/$id'
@@ -304,6 +305,7 @@ const rootRouteChildren: RootRouteChildren = {
   SearchRoute: SearchRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   MovieIdRoute: MovieIdRoute,
+  SeriesIdRoute: SeriesIdRoute,
   SeriesIndexRoute: SeriesIndexRoute,
   ApiPublicStreamRoute: ApiPublicStreamRoute,
   ApiPublicXtreamRoute: ApiPublicXtreamRoute,
