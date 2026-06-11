@@ -5,6 +5,7 @@ import { MonitorPlay, Loader2, User, Lock, Eye, EyeOff, Settings } from "lucide-
 import { authenticate, normalizeBase, FlowApiError, ERROR_MESSAGES } from "../lib/xtream";
 import { useAccount } from "../hooks/use-account";
 import { loadDns } from "../lib/storage";
+import { useSettings } from "../hooks/use-settings";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
