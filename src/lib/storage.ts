@@ -71,6 +71,7 @@ export interface AppSettings {
   background?: string; // data URL or remote URL
   banner?: string; // ad banner image
   bannerLink?: string; // optional click-through URL
+  dnsList?: string[]; // up to 5 server DNS endpoints
 }
 
 export const SETTINGS_EVENT = "flowtv:settings";
