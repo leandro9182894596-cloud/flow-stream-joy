@@ -1,19 +1,30 @@
-import { useEffect, useState } from "react";
-import { loadSettings, SETTINGS_EVENT, type AppSettings } from "../lib/storage";
+import { useQuery } from "@tanstack/react-query";
+import { loadSettings, saveSettings, type AppSettings } from "../lib/storage";
+import { getConfig } from "../lib/config.functions";
 
+/**
+ * Global app appearance settings (logo, background, banner, DNS list).
+ * Stored server-side so every user sees the same branding configured by the
+ * admin. localStorage is used only as an instant-render cache.
+ */
 export function useSettings(): AppSettings {
-  const [settings, setSettings] = useState<AppSettings>({});
+  const { data } = useQuery<AppSettings>({
+    queryKey: ["app-config"],
+    initialData: () => loadSettings(),
+    staleTime: 60 * 1000,
+    queryFn: async () => {
+      const cfg = await getConfig();
+      const next: AppSettings = {
+        logo: cfg.logo ?? undefined,
+        background: cfg.background ?? undefined,
+        banner: cfg.banner ?? undefined,
+        bannerLink: cfg.bannerLink ?? undefined,
+        dnsList: cfg.dnsList,
+      };
+      saveSettings(next);
+      return next;
+    },
+  });
 
-  useEffect(() => {
-    const sync = () => setSettings(loadSettings());
-    sync();
-    window.addEventListener(SETTINGS_EVENT, sync);
-    window.addEventListener("storage", sync);
-    return () => {
-      window.removeEventListener(SETTINGS_EVENT, sync);
-      window.removeEventListener("storage", sync);
-    };
-  }, []);
-
-  return settings;
+  return data ?? {};
 }

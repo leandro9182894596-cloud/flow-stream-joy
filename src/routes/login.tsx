@@ -1,10 +1,9 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { MonitorPlay, Loader2, User, Lock, Eye, EyeOff, Settings } from "lucide-react";
+import { MonitorPlay, Loader2, User, Lock, Eye, EyeOff, Settings, Server } from "lucide-react";
 import { authenticate, normalizeBase, FlowApiError, ERROR_MESSAGES } from "../lib/xtream";
 import { useAccount } from "../hooks/use-account";
-import { loadDns } from "../lib/storage";
 import { useSettings } from "../hooks/use-settings";
 
 export const Route = createFileRoute("/login")({
@@ -21,15 +20,18 @@ function LoginPage() {
   const navigate = useNavigate();
   const { login, account, ready } = useAccount();
   const settings = useSettings();
-  const [dns, setDns] = useState<string | null>(null);
+  const dnsList = settings.dnsList ?? [];
+  const [selectedDns, setSelectedDns] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setDns(loadDns());
-  }, []);
+    if (dnsList.length && !dnsList.includes(selectedDns)) {
+      setSelectedDns(dnsList[0]);
+    }
+  }, [dnsList, selectedDns]);
 
   useEffect(() => {
     if (ready && account) navigate({ to: "/" });
@@ -37,7 +39,7 @@ function LoginPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const server = loadDns();
+    const server = selectedDns || dnsList[0];
     if (!server) {
       toast.error("Servidor não configurado", {
         description: "Peça ao administrador para cadastrar a DNS na página de Admin.",
@@ -86,17 +88,35 @@ function LoginPage() {
           <p className="mt-2 text-sm text-muted-foreground">Seu universo IPTV em qualquer tela</p>
         </div>
 
-
         <form
           onSubmit={onSubmit}
           className="space-y-4 rounded-2xl border border-border bg-card/80 p-6 shadow-card backdrop-blur"
         >
-          {!dns && (
+          {dnsList.length === 0 && (
             <p className="rounded-xl border border-destructive/40 bg-destructive/10 px-3.5 py-3 text-xs text-destructive">
               Nenhuma DNS configurada. Acesse a página de Admin para cadastrar o servidor.
             </p>
           )}
 
+          {dnsList.length > 1 && (
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-medium text-muted-foreground">Servidor</span>
+              <div className="flex items-center gap-3 rounded-xl border border-input bg-secondary/50 px-3.5 py-3 transition-colors focus-within:border-primary">
+                <Server className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <select
+                  value={selectedDns}
+                  onChange={(e) => setSelectedDns(e.target.value)}
+                  className="w-full bg-transparent text-foreground focus:outline-none"
+                >
+                  {dnsList.map((d, i) => (
+                    <option key={d} value={d} className="bg-card text-foreground">
+                      Servidor {i + 1} — {d}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </label>
+          )}
 
           <Field icon={User} label="Usuário">
             <input

@@ -90,7 +90,16 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="hidden sm:inline">Buscar canais, filmes e séries…</span>
             <span className="sm:hidden">Buscar</span>
           </Link>
+          <button
+            onClick={handleLogout}
+            className="focusable flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive lg:hidden"
+            aria-label="Sair"
+          >
+            <LogOut className="h-4 w-4" />
+            <span className="hidden sm:inline">Sair</span>
+          </button>
         </header>
+
         <main className="flex-1">
           <AnimatePresence mode="wait">
             <motion.div

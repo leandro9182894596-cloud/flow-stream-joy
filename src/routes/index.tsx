@@ -71,6 +71,13 @@ function HomePage() {
 
   return (
     <AppShell>
+      {/* Ad banner — prominent at the very top */}
+      {settings.banner && (
+        <div className="px-4 pt-4 lg:px-12">
+          <AdBanner image={settings.banner} link={settings.bannerLink} />
+        </div>
+      )}
+
       {/* Hero */}
       {featured && (
         <section className="relative h-[52vh] min-h-[360px] w-full overflow-hidden">
@@ -111,8 +118,7 @@ function HomePage() {
       )}
 
       <div className="space-y-10 px-4 py-8 lg:px-12">
-        {/* Ad banner */}
-        {settings.banner && <AdBanner image={settings.banner} link={settings.bannerLink} />}
+
 
 
         {/* Continue watching */}
@@ -273,12 +279,17 @@ function AdBanner({ image, link }: { image: string; link?: string }) {
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4 }}
-      className="relative overflow-hidden rounded-2xl border border-border shadow-card"
+      className="relative overflow-hidden rounded-2xl border border-primary/30 shadow-glow ring-1 ring-primary/20"
     >
       <span className="absolute left-3 top-3 z-10 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/90">
         Anúncio
       </span>
-      <img src={image} alt="Anúncio" className="max-h-64 w-full object-cover" loading="lazy" />
+      <img
+        src={image}
+        alt="Anúncio"
+        className="max-h-[420px] min-h-[200px] w-full object-cover"
+        loading="eager"
+      />
     </motion.div>
   );
   if (link) {
@@ -290,6 +301,7 @@ function AdBanner({ image, link }: { image: string; link?: string }) {
   }
   return content;
 }
+
 
 interface PreloadStep {
   label: string;
