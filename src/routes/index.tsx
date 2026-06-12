@@ -71,6 +71,13 @@ function HomePage() {
 
   return (
     <AppShell>
+      {/* Ad banner — prominent at the very top */}
+      {settings.banner && (
+        <div className="px-4 pt-4 lg:px-12">
+          <AdBanner image={settings.banner} link={settings.bannerLink} />
+        </div>
+      )}
+
       {/* Hero */}
       {featured && (
         <section className="relative h-[52vh] min-h-[360px] w-full overflow-hidden">
@@ -111,8 +118,7 @@ function HomePage() {
       )}
 
       <div className="space-y-10 px-4 py-8 lg:px-12">
-        {/* Ad banner */}
-        {settings.banner && <AdBanner image={settings.banner} link={settings.bannerLink} />}
+
 
 
         {/* Continue watching */}
