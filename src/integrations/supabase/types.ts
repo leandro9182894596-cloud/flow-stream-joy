@@ -14,7 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      app_config: {
+        Row: {
+          admin_password: string
+          background: string | null
+          banner: string | null
+          banner_link: string | null
+          dns_list: Json
+          id: number
+          logo: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_password?: string
+          background?: string | null
+          banner?: string | null
+          banner_link?: string | null
+          dns_list?: Json
+          id?: number
+          logo?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_password?: string
+          background?: string | null
+          banner?: string | null
+          banner_link?: string | null
+          dns_list?: Json
+          id?: number
+          logo?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
