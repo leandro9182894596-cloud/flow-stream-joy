@@ -75,7 +75,15 @@ export const saveConfig = createServerFn({ method: "POST" })
       throw new Error("Senha de administrador incorreta.");
     }
 
-    const update: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    const update: {
+      updated_at: string;
+      logo?: string | null;
+      background?: string | null;
+      banner?: string | null;
+      banner_link?: string | null;
+      dns_list?: string[];
+      admin_password?: string;
+    } = { updated_at: new Date().toISOString() };
     if (data.logo !== undefined) update.logo = data.logo;
     if (data.background !== undefined) update.background = data.background;
     if (data.banner !== undefined) update.banner = data.banner;
