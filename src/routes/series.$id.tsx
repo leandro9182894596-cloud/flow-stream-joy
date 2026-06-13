@@ -72,7 +72,7 @@ function SeriesDetailPage() {
   }
 
   const title = data?.info?.name || "Série";
-  const cover = data?.info?.cover;
+  const cover = proxiedImage(data?.info?.cover);
   const progressKey = `series:${seriesId}`;
   const resume = getProgress(progressKey);
 
