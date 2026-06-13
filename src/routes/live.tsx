@@ -6,7 +6,7 @@ import { VideoPlayer } from "../components/VideoPlayer";
 import { CategoryBar } from "../components/CategoryBar";
 import { useRequireAccount } from "../hooks/use-require-account";
 import { useCachedQuery, accountKey } from "../lib/queries";
-import { getLiveCategories, getLiveStreams, liveStreamUrl, type LiveStream } from "../lib/xtream";
+import { getLiveCategories, getLiveStreams, liveStreamUrl, proxiedImage, type LiveStream } from "../lib/xtream";
 import { toggleFavorite, isFavorite } from "../lib/storage";
 import { toast } from "sonner";
 
