@@ -28,9 +28,9 @@ export function ContentCard({ to, params, title, image, subtitle, rating, progre
           wide ? "aspect-video" : "aspect-[2/3]"
         }`}
       >
-        {image && !failed ? (
+        {src && !failed ? (
           <img
-            src={image}
+            src={src}
             alt={title}
             loading="lazy"
             onError={() => setFailed(true)}
