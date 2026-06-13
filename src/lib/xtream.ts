@@ -125,6 +125,52 @@ export async function authenticate(account: Account): Promise<UserInfo> {
   return info;
 }
 
+export async function authenticateWithDnsFallback(
+  bases: string[],
+  credentials: Pick<Account, "username" | "password">,
+): Promise<{ account: Account; info: UserInfo }> {
+  const normalizedBases = Array.from(
+    new Set(
+      bases
+        .map(normalizeBase)
+        .filter(Boolean),
+    ),
+  );
+
+  if (normalizedBases.length === 0) {
+    throw new FlowApiError("DNS_UNAVAILABLE");
+  }
+
+  let preferredError: FlowApiError | null = null;
+  let fallbackError: FlowApiError | null = null;
+
+  for (const base of normalizedBases) {
+    const account: Account = {
+      base,
+      username: credentials.username.trim(),
+      password: credentials.password.trim(),
+    };
+
+    try {
+      const info = await authenticate(account);
+      return { account, info };
+    } catch (error) {
+      if (!(error instanceof FlowApiError)) {
+        fallbackError = new FlowApiError("UNKNOWN");
+        continue;
+      }
+
+      if (error.code === "ACCOUNT_EXPIRED" || error.code === "INVALID_USER" || error.code === "INVALID_PASSWORD") {
+        preferredError = error;
+      } else if (!fallbackError) {
+        fallbackError = error;
+      }
+    }
+  }
+
+  throw preferredError ?? fallbackError ?? new FlowApiError("UNKNOWN");
+}
+
 // ---------- Content types ----------
 export interface Category {
   category_id: string;

@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { MonitorPlay, Loader2, User, Lock, Eye, EyeOff, Settings, Server } from "lucide-react";
-import { authenticate, normalizeBase, FlowApiError, ERROR_MESSAGES } from "../lib/xtream";
+import { authenticateWithDnsFallback, FlowApiError, ERROR_MESSAGES } from "../lib/xtream";
 import { useAccount } from "../hooks/use-account";
 import { useSettings } from "../hooks/use-settings";
 
@@ -20,18 +20,14 @@ function LoginPage() {
   const navigate = useNavigate();
   const { login, account, ready } = useAccount();
   const settings = useSettings();
-  const dnsList = settings.dnsList ?? [];
-  const [selectedDns, setSelectedDns] = useState("");
+  const dnsList = useMemo(
+    () => (settings.dnsList ?? []).map((dns) => dns.trim()).filter(Boolean),
+    [settings.dnsList],
+  );
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (dnsList.length && !dnsList.includes(selectedDns)) {
-      setSelectedDns(dnsList[0]);
-    }
-  }, [dnsList, selectedDns]);
 
   useEffect(() => {
     if (ready && account) navigate({ to: "/" });
@@ -39,8 +35,7 @@ function LoginPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const server = selectedDns || dnsList[0];
-    if (!server) {
+    if (dnsList.length === 0) {
       toast.error("Servidor não configurado", {
         description: "Peça ao administrador para cadastrar a DNS na página de Admin.",
       });
@@ -51,10 +46,12 @@ function LoginPage() {
       return;
     }
     setLoading(true);
-    const acc = { base: normalizeBase(server), username: username.trim(), password: password.trim() };
     try {
-      const info = await authenticate(acc);
-      login(acc, info);
+      const { account: nextAccount, info } = await authenticateWithDnsFallback(dnsList, {
+        username,
+        password,
+      });
+      login(nextAccount, info);
       toast.success(`Bem-vindo, ${info.username}!`);
       navigate({ to: "/" });
     } catch (err) {
@@ -99,23 +96,17 @@ function LoginPage() {
           )}
 
           {dnsList.length > 1 && (
-            <label className="block">
-              <span className="mb-1.5 block text-xs font-medium text-muted-foreground">Servidor</span>
-              <div className="flex items-center gap-3 rounded-xl border border-input bg-secondary/50 px-3.5 py-3 transition-colors focus-within:border-primary">
-                <Server className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <select
-                  value={selectedDns}
-                  onChange={(e) => setSelectedDns(e.target.value)}
-                  className="w-full bg-transparent text-foreground focus:outline-none"
-                >
-                  {dnsList.map((d, i) => (
-                    <option key={d} value={d} className="bg-card text-foreground">
-                      Servidor {i + 1} — {d}
-                    </option>
-                  ))}
-                </select>
+            <div className="rounded-xl border border-primary/30 bg-primary/10 px-3.5 py-3 text-xs text-foreground">
+              <div className="flex items-start gap-2">
+                <Server className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <div>
+                  <p className="font-medium">Busca automatica de servidor ativa</p>
+                  <p className="mt-1 text-muted-foreground">
+                    O app testa as DNS cadastradas e conecta sozinho na primeira que responder.
+                  </p>
+                </div>
               </div>
-            </label>
+            </div>
           )}
 
           <Field icon={User} label="Usuário">

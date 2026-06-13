@@ -177,7 +177,7 @@ function AdminPage() {
             <Server className="h-5 w-5 text-primary" /> Servidores (DNS)
           </h2>
           <p className="text-xs text-muted-foreground">
-            Cadastre até 5 servidores. Os usuários poderão escolher na tela de login.
+            Cadastre até 5 servidores. O app testa as DNS automaticamente e conecta na primeira que responder.
           </p>
           {form.dns.map((value, i) => (
             <div

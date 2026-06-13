@@ -11,7 +11,11 @@ export function useSettings(): AppSettings {
   const { data } = useQuery<AppSettings>({
     queryKey: ["app-config"],
     initialData: () => loadSettings(),
-    staleTime: 60 * 1000,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchInterval: 15 * 1000,
     queryFn: async () => {
       const cfg = await getConfig();
       const next: AppSettings = {
