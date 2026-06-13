@@ -51,8 +51,8 @@ function MoviePage() {
   const data = info.data;
   const ext = data?.movie_data?.container_extension || "mp4";
   const title = data?.movie_data?.name || "Filme";
-  const poster = data?.info?.movie_image;
-  const backdrop = data?.info?.backdrop_path?.[0] || poster;
+  const poster = proxiedImage(data?.info?.movie_image);
+  const backdrop = proxiedImage(data?.info?.backdrop_path?.[0]) || poster;
 
   const handleProgress = (pos: number, dur: number) => {
     const now = Date.now();
