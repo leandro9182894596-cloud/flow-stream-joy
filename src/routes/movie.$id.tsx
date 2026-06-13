@@ -5,7 +5,7 @@ import { AppShell } from "../components/AppShell";
 import { VideoPlayer } from "../components/VideoPlayer";
 import { useRequireAccount } from "../hooks/use-require-account";
 import { useCachedQuery, accountKey } from "../lib/queries";
-import { getVodInfo, vodStreamUrl } from "../lib/xtream";
+import { getVodInfo, vodStreamUrl, proxiedImage } from "../lib/xtream";
 import { getProgress, saveProgress, toggleFavorite, isFavorite } from "../lib/storage";
 import { toast } from "sonner";
 
