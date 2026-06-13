@@ -81,7 +81,7 @@ function LivePage() {
                 key={selected.stream_id}
                 source={{ url: liveStreamUrl(account, selected.stream_id), isLive: true }}
                 title={selected.name}
-                poster={selected.stream_icon}
+                poster={proxiedImage(selected.stream_icon)}
               />
               <div className="mt-3 flex items-center justify-between">
                 <h1 className="font-display text-xl font-bold">{selected.name}</h1>
