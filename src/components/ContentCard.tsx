@@ -16,6 +16,7 @@ interface ContentCardProps {
 
 export function ContentCard({ to, params, title, image, subtitle, rating, progress, wide }: ContentCardProps) {
   const [failed, setFailed] = useState(false);
+  const src = proxiedImage(image);
   return (
     <Link
       to={to as never}
