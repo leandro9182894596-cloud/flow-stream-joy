@@ -134,7 +134,7 @@ function LivePage() {
                   >
                     <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-md bg-secondary">
                       {c.stream_icon ? (
-                        <img src={c.stream_icon} alt="" loading="lazy" className="h-full w-full object-contain p-1" />
+                        <img src={proxiedImage(c.stream_icon)} alt="" loading="lazy" className="h-full w-full object-contain p-1" />
                       ) : (
                         <Tv className="h-5 w-5 text-muted-foreground" />
                       )}
