@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Play, ImageOff } from "lucide-react";
 import { useState } from "react";
+import { proxiedImage } from "../lib/xtream";
 
 interface ContentCardProps {
   to: string;
