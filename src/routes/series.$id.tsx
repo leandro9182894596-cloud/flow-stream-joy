@@ -251,7 +251,7 @@ function SeriesDetailPage() {
                           >
                             <div className="relative grid h-16 w-28 shrink-0 place-items-center overflow-hidden rounded-lg bg-secondary">
                               {ep.info?.movie_image ? (
-                                <img src={ep.info.movie_image} alt="" loading="lazy" className="h-full w-full object-cover" />
+                                <img src={proxiedImage(ep.info.movie_image)} alt="" loading="lazy" className="h-full w-full object-cover" />
                               ) : (
                                 <Play className="h-5 w-5 text-muted-foreground" />
                               )}
