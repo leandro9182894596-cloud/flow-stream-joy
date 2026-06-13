@@ -152,7 +152,7 @@ function SeriesDetailPage() {
             source={{ url: seriesStreamUrl(account, current.id, current.container_extension || "mp4") }}
             title={current.title}
             subtitle={`${title} • T${current.seasonNum} E${current.episode_num}`}
-            poster={current.info?.movie_image || cover}
+            poster={proxiedImage(current.info?.movie_image) || cover}
             startPosition={start}
             onProgress={handleProgress}
             onEnded={handleNext}
