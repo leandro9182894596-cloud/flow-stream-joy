@@ -5,7 +5,7 @@ import { AppShell } from "../components/AppShell";
 import { VideoPlayer } from "../components/VideoPlayer";
 import { useRequireAccount } from "../hooks/use-require-account";
 import { useCachedQuery, accountKey } from "../lib/queries";
-import { getSeriesInfo, seriesStreamUrl, type SeriesEpisode } from "../lib/xtream";
+import { getSeriesInfo, seriesStreamUrl, proxiedImage, type SeriesEpisode } from "../lib/xtream";
 import { getProgress, saveProgress, toggleFavorite, isFavorite } from "../lib/storage";
 import { toast } from "sonner";
 
@@ -72,7 +72,7 @@ function SeriesDetailPage() {
   }
 
   const title = data?.info?.name || "Série";
-  const cover = data?.info?.cover;
+  const cover = proxiedImage(data?.info?.cover);
   const progressKey = `series:${seriesId}`;
   const resume = getProgress(progressKey);
 
@@ -152,7 +152,7 @@ function SeriesDetailPage() {
             source={{ url: seriesStreamUrl(account, current.id, current.container_extension || "mp4") }}
             title={current.title}
             subtitle={`${title} • T${current.seasonNum} E${current.episode_num}`}
-            poster={current.info?.movie_image || cover}
+            poster={proxiedImage(current.info?.movie_image) || cover}
             startPosition={start}
             onProgress={handleProgress}
             onEnded={handleNext}
@@ -251,7 +251,7 @@ function SeriesDetailPage() {
                           >
                             <div className="relative grid h-16 w-28 shrink-0 place-items-center overflow-hidden rounded-lg bg-secondary">
                               {ep.info?.movie_image ? (
-                                <img src={ep.info.movie_image} alt="" loading="lazy" className="h-full w-full object-cover" />
+                                <img src={proxiedImage(ep.info.movie_image)} alt="" loading="lazy" className="h-full w-full object-cover" />
                               ) : (
                                 <Play className="h-5 w-5 text-muted-foreground" />
                               )}

@@ -272,6 +272,19 @@ export const getSeriesInfo = (a: Account, seriesId: number) =>
 // block mixed content, so we route every stream through the HTTPS media proxy.
 // For HLS (.m3u8) the proxy rewrites child URLs too; we keep the .m3u8 suffix
 // in the proxied URL so the player still detects HLS.
+// Cover/poster images from Xtream panels are usually plain HTTP. The app runs
+// on HTTPS, so the browser blocks them as mixed content and the images never
+// appear. Route HTTP images through the HTTPS media proxy so they always load.
+export function proxiedImage(url?: string): string | undefined {
+  if (!url) return undefined;
+  const u = url.trim();
+  if (!u || u.startsWith("data:")) return u || undefined;
+  if (typeof window === "undefined") return u;
+  // Only HTTP needs proxying; HTTPS and relative URLs load fine directly.
+  if (/^http:\/\//i.test(u)) return `/api/public/stream?url=${encodeURIComponent(u)}`;
+  return u;
+}
+
 function proxiedUrl(absoluteUrl: string): string {
   if (typeof window === "undefined") return absoluteUrl;
   const hls = /\.m3u8($|\?)/i.test(absoluteUrl) ? "&ext=.m3u8" : "";

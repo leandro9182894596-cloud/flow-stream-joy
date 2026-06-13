@@ -7,7 +7,7 @@ import { ContentCard } from "../components/ContentCard";
 import { useRequireAccount } from "../hooks/use-require-account";
 import { useSettings } from "../hooks/use-settings";
 import { useCachedQuery, accountKey } from "../lib/queries";
-import { getVodStreams, getSeries, getLiveStreams } from "../lib/xtream";
+import { getVodStreams, getSeries, getLiveStreams, proxiedImage } from "../lib/xtream";
 import { loadProgress, removeProgress, type ProgressEntry } from "../lib/storage";
 import { useState, useEffect } from "react";
 
@@ -83,7 +83,7 @@ function HomePage() {
         <section className="relative h-[52vh] min-h-[360px] w-full overflow-hidden">
           {featured.stream_icon && (
             <img
-              src={featured.stream_icon}
+              src={proxiedImage(featured.stream_icon)}
               alt={featured.name}
               className="absolute inset-0 h-full w-full object-cover opacity-50"
             />

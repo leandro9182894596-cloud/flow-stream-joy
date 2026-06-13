@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Play, ImageOff } from "lucide-react";
 import { useState } from "react";
+import { proxiedImage } from "../lib/xtream";
 
 interface ContentCardProps {
   to: string;
@@ -15,6 +16,7 @@ interface ContentCardProps {
 
 export function ContentCard({ to, params, title, image, subtitle, rating, progress, wide }: ContentCardProps) {
   const [failed, setFailed] = useState(false);
+  const src = proxiedImage(image);
   return (
     <Link
       to={to as never}
@@ -26,9 +28,9 @@ export function ContentCard({ to, params, title, image, subtitle, rating, progre
           wide ? "aspect-video" : "aspect-[2/3]"
         }`}
       >
-        {image && !failed ? (
+        {src && !failed ? (
           <img
-            src={image}
+            src={src}
             alt={title}
             loading="lazy"
             onError={() => setFailed(true)}

@@ -5,7 +5,7 @@ import { AppShell } from "../components/AppShell";
 import { VideoPlayer } from "../components/VideoPlayer";
 import { useRequireAccount } from "../hooks/use-require-account";
 import { useCachedQuery, accountKey } from "../lib/queries";
-import { getVodInfo, vodStreamUrl } from "../lib/xtream";
+import { getVodInfo, vodStreamUrl, proxiedImage } from "../lib/xtream";
 import { getProgress, saveProgress, toggleFavorite, isFavorite } from "../lib/storage";
 import { toast } from "sonner";
 
@@ -51,8 +51,8 @@ function MoviePage() {
   const data = info.data;
   const ext = data?.movie_data?.container_extension || "mp4";
   const title = data?.movie_data?.name || "Filme";
-  const poster = data?.info?.movie_image;
-  const backdrop = data?.info?.backdrop_path?.[0] || poster;
+  const poster = proxiedImage(data?.info?.movie_image);
+  const backdrop = proxiedImage(data?.info?.backdrop_path?.[0]) || poster;
 
   const handleProgress = (pos: number, dur: number) => {
     const now = Date.now();

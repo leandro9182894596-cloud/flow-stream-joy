@@ -6,7 +6,7 @@ import { VideoPlayer } from "../components/VideoPlayer";
 import { CategoryBar } from "../components/CategoryBar";
 import { useRequireAccount } from "../hooks/use-require-account";
 import { useCachedQuery, accountKey } from "../lib/queries";
-import { getLiveCategories, getLiveStreams, liveStreamUrl, type LiveStream } from "../lib/xtream";
+import { getLiveCategories, getLiveStreams, liveStreamUrl, proxiedImage, type LiveStream } from "../lib/xtream";
 import { toggleFavorite, isFavorite } from "../lib/storage";
 import { toast } from "sonner";
 
@@ -81,7 +81,7 @@ function LivePage() {
                 key={selected.stream_id}
                 source={{ url: liveStreamUrl(account, selected.stream_id), isLive: true }}
                 title={selected.name}
-                poster={selected.stream_icon}
+                poster={proxiedImage(selected.stream_icon)}
               />
               <div className="mt-3 flex items-center justify-between">
                 <h1 className="font-display text-xl font-bold">{selected.name}</h1>
@@ -134,7 +134,7 @@ function LivePage() {
                   >
                     <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-md bg-secondary">
                       {c.stream_icon ? (
-                        <img src={c.stream_icon} alt="" loading="lazy" className="h-full w-full object-contain p-1" />
+                        <img src={proxiedImage(c.stream_icon)} alt="" loading="lazy" className="h-full w-full object-contain p-1" />
                       ) : (
                         <Tv className="h-5 w-5 text-muted-foreground" />
                       )}
