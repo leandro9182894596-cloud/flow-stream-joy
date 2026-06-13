@@ -28,8 +28,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="relative flex min-h-screen bg-background">
       {settings.background && (
         <div className="pointer-events-none fixed inset-0 z-0">
-          <img src={settings.background} alt="" className="h-full w-full object-cover opacity-20" />
-          <div className="absolute inset-0 bg-background/80" />
+          <img src={settings.background} alt="" className="h-full w-full object-cover" />
         </div>
       )}
       <div className="relative z-10 flex min-h-screen w-full">
