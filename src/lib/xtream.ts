@@ -246,26 +246,93 @@ export const getVodCategories = (a: Account) =>
 export const getSeriesCategories = (a: Account) =>
   apiCall<Category[]>(a, { action: "get_series_categories" });
 
-export const getLiveStreams = (a: Account, categoryId?: string) =>
-  apiCall<LiveStream[]>(a, {
-    action: "get_live_streams",
-    ...(categoryId ? { category_id: categoryId } : {}),
-  });
-export const getVodStreams = (a: Account, categoryId?: string) =>
-  apiCall<VodStream[]>(a, {
-    action: "get_vod_streams",
-    ...(categoryId ? { category_id: categoryId } : {}),
-  });
-export const getSeries = (a: Account, categoryId?: string) =>
-  apiCall<SeriesItem[]>(a, {
-    action: "get_series",
-    ...(categoryId ? { category_id: categoryId } : {}),
-  });
+export const getLiveStreams = async (a: Account, categoryId?: string) =>
+  normalizeLiveStreams(
+    await apiCall<LiveStream[]>(a, {
+      action: "get_live_streams",
+      ...(categoryId ? { category_id: categoryId } : {}),
+    }),
+    a.base,
+  );
+export const getVodStreams = async (a: Account, categoryId?: string) =>
+  normalizeVodStreams(
+    await apiCall<VodStream[]>(a, {
+      action: "get_vod_streams",
+      ...(categoryId ? { category_id: categoryId } : {}),
+    }),
+    a.base,
+  );
+export const getSeries = async (a: Account, categoryId?: string) =>
+  normalizeSeriesList(
+    await apiCall<SeriesItem[]>(a, {
+      action: "get_series",
+      ...(categoryId ? { category_id: categoryId } : {}),
+    }),
+    a.base,
+  );
 
-export const getVodInfo = (a: Account, vodId: number) =>
-  apiCall<VodInfo>(a, { action: "get_vod_info", vod_id: String(vodId) });
-export const getSeriesInfo = (a: Account, seriesId: number) =>
-  apiCall<SeriesInfo>(a, { action: "get_series_info", series_id: String(seriesId) });
+export const getVodInfo = async (a: Account, vodId: number) =>
+  normalizeVodInfo(await apiCall<VodInfo>(a, { action: "get_vod_info", vod_id: String(vodId) }), a.base);
+export const getSeriesInfo = async (a: Account, seriesId: number) =>
+  normalizeSeriesInfo(await apiCall<SeriesInfo>(a, { action: "get_series_info", series_id: String(seriesId) }), a.base);
+
+function normalizeMediaUrl(url: string | undefined, base: string): string {
+  const raw = (url ?? "").trim().replace(/\\\//g, "/");
+  if (!raw || raw.startsWith("data:") || raw.startsWith("blob:")) return raw;
+  if (/^https?:\/\//i.test(raw)) return raw;
+  if (raw.startsWith("//")) {
+    try {
+      return `${new URL(base).protocol}${raw}`;
+    } catch {
+      return `https:${raw}`;
+    }
+  }
+  try {
+    return new URL(raw, `${base.replace(/\/+$/, "")}/`).toString();
+  } catch {
+    return raw;
+  }
+}
+
+function normalizeLiveStreams(list: LiveStream[], base: string): LiveStream[] {
+  return Array.isArray(list) ? list.map((item) => ({ ...item, stream_icon: normalizeMediaUrl(item.stream_icon, base) })) : [];
+}
+
+function normalizeVodStreams(list: VodStream[], base: string): VodStream[] {
+  return Array.isArray(list) ? list.map((item) => ({ ...item, stream_icon: normalizeMediaUrl(item.stream_icon, base) })) : [];
+}
+
+function normalizeSeriesList(list: SeriesItem[], base: string): SeriesItem[] {
+  return Array.isArray(list) ? list.map((item) => ({ ...item, cover: normalizeMediaUrl(item.cover, base) })) : [];
+}
+
+function normalizeVodInfo(data: VodInfo, base: string): VodInfo {
+  return {
+    ...data,
+    info: {
+      ...data.info,
+      movie_image: normalizeMediaUrl(data.info?.movie_image, base),
+      backdrop_path: data.info?.backdrop_path?.map((url) => normalizeMediaUrl(url, base)),
+    },
+  };
+}
+
+function normalizeSeriesInfo(data: SeriesInfo, base: string): SeriesInfo {
+  const episodes = Object.fromEntries(
+    Object.entries(data.episodes ?? {}).map(([season, eps]) => [
+      season,
+      eps.map((ep) => ({
+        ...ep,
+        info: ep.info ? { ...ep.info, movie_image: normalizeMediaUrl(ep.info.movie_image, base) } : ep.info,
+      })),
+    ]),
+  );
+  return {
+    ...data,
+    info: { ...data.info, cover: normalizeMediaUrl(data.info?.cover, base) },
+    episodes,
+  };
+}
 
 // ---------- Stream URL builders ----------
 // The app runs on HTTPS but Xtream streams are usually plain HTTP. Browsers
@@ -278,10 +345,9 @@ export const getSeriesInfo = (a: Account, seriesId: number) =>
 export function proxiedImage(url?: string): string | undefined {
   if (!url) return undefined;
   const u = url.trim();
-  if (!u || u.startsWith("data:")) return u || undefined;
-  if (typeof window === "undefined") return u;
-  // Only HTTP needs proxying; HTTPS and relative URLs load fine directly.
-  if (/^http:\/\//i.test(u)) return `/api/public/stream?url=${encodeURIComponent(u)}`;
+  if (!u || u.startsWith("data:") || u.startsWith("blob:") || u.startsWith("/api/public/stream")) return u || undefined;
+  // Keep SSR and browser markup equal, and route remote covers through our HTTPS proxy.
+  if (/^https?:\/\//i.test(u)) return `/api/public/stream?url=${encodeURIComponent(u)}`;
   return u;
 }
 
