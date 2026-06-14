@@ -146,9 +146,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 function Brand({ compact = false }: { compact?: boolean }) {
   const settings = useSettings();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   return (
     <Link to="/" className="focusable flex items-center gap-2.5">
-      {settings.logo ? (
+      {mounted && settings.logo ? (
         <img
           src={settings.logo}
           alt="Logo"
