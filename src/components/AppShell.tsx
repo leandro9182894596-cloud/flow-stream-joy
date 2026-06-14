@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Tv, Film, MonitorPlay, Clapperboard, LogOut, Search, Heart } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -18,6 +18,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const settings = useSettings();
+  // Avoid SSR/client hydration mismatch (React #418 → white screen on TV):
+  // settings come from localStorage which the server can't see, so only apply
+  // appearance after the component has mounted on the client.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const hasBg = mounted && !!settings.background;
 
   const handleLogout = () => {
     logout();
@@ -25,15 +32,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="relative flex min-h-screen bg-background">
-      {settings.background && (
+    <div className={`relative flex min-h-screen ${hasBg ? "bg-black" : "bg-background"}`}>
+      {hasBg && (
         <div className="pointer-events-none fixed inset-0 z-0">
           <img src={settings.background} alt="" className="h-full w-full object-cover" />
         </div>
       )}
       <div className="relative z-10 flex min-h-screen w-full">
       {/* Sidebar (desktop) */}
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar p-4 lg:flex">
+      <aside className={`sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-sidebar-border p-4 lg:flex ${hasBg ? "bg-sidebar/70 backdrop-blur" : "bg-sidebar"}`}>
         <Brand />
         <nav className="mt-8 flex flex-1 flex-col gap-1">
           {NAV.map((item) => {
@@ -139,9 +146,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 function Brand({ compact = false }: { compact?: boolean }) {
   const settings = useSettings();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   return (
     <Link to="/" className="focusable flex items-center gap-2.5">
-      {settings.logo ? (
+      {mounted && settings.logo ? (
         <img
           src={settings.logo}
           alt="Logo"
