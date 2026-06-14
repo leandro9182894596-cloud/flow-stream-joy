@@ -86,9 +86,10 @@ async function handle(request: Request): Promise<Response> {
   }
 
   const targetOrigin = new URL(target).origin;
+  const looksLikeImage = /\.(avif|bmp|gif|jpe?g|png|svg|webp)(\?|$)/i.test(target);
   const upstreamHeaders: Record<string, string> = {
     "User-Agent": "Mozilla/5.0 (Linux; Android TV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36 FlowTV/1.0",
-    Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+    Accept: looksLikeImage ? "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8" : "*/*",
     Referer: `${targetOrigin}/`,
     Origin: targetOrigin,
   };

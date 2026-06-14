@@ -3,6 +3,7 @@ import { getCache, setCache } from "./storage";
 import type { Account } from "./xtream";
 
 const HOUR = 60 * 60 * 1000;
+const CONTENT_CACHE_VERSION = "covers-v2";
 
 /**
  * react-query + localStorage cache combo for instant loads and offline resilience.
@@ -30,5 +31,5 @@ export function useCachedQuery<T>(
 
 export function accountKey(a: Account | null): string {
   if (!a) return "anon";
-  return `${a.base}|${a.username}`;
+  return `${a.base}|${a.username}|${CONTENT_CACHE_VERSION}`;
 }
