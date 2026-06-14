@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Tv, Film, MonitorPlay, Clapperboard, LogOut, Search, Heart } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
