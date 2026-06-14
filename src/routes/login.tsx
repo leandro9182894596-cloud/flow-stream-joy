@@ -20,6 +20,7 @@ function LoginPage() {
   const navigate = useNavigate();
   const { login, account, ready } = useAccount();
   const settings = useSettings();
+  const [mounted, setMounted] = useState(false);
   const dnsList = useMemo(
     () => (settings.dnsList ?? []).map((dns) => dns.trim()).filter(Boolean),
     [settings.dnsList],
@@ -28,6 +29,8 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (ready && account) navigate({ to: "/" });
@@ -70,7 +73,7 @@ function LoginPage() {
 
       <div className="relative z-10 w-full max-w-md">
         <div className="mb-8 flex flex-col items-center text-center">
-          {settings.logo ? (
+          {mounted && settings.logo ? (
             <img src={settings.logo} alt="Logo" className="mb-4 h-20 w-auto max-w-[220px] object-contain" />
           ) : (
             <>

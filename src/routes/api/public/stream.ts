@@ -85,9 +85,12 @@ async function handle(request: Request): Promise<Response> {
     return new Response("Invalid url", { status: 400 });
   }
 
+  const targetOrigin = new URL(target).origin;
   const upstreamHeaders: Record<string, string> = {
-    "User-Agent": "FlowTV/1.0",
-    Accept: "*/*",
+    "User-Agent": "Mozilla/5.0 (Linux; Android TV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36 FlowTV/1.0",
+    Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+    Referer: `${targetOrigin}/`,
+    Origin: targetOrigin,
   };
   const range = request.headers.get("range");
   if (range) upstreamHeaders["Range"] = range;

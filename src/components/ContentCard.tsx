@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Play, ImageOff } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { proxiedImage } from "../lib/xtream";
 
 interface ContentCardProps {
@@ -17,6 +17,11 @@ interface ContentCardProps {
 export function ContentCard({ to, params, title, image, subtitle, rating, progress, wide }: ContentCardProps) {
   const [failed, setFailed] = useState(false);
   const src = proxiedImage(image);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
   return (
     <Link
       to={to as never}

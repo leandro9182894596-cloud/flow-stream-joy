@@ -37,6 +37,7 @@ function SeriesDetailPage() {
   const [season, setSeason] = useState<number | null>(null);
   const [current, setCurrent] = useState<FlatEpisode | null>(null);
   const [fav, setFav] = useState(false);
+  const [start, setStart] = useState(0);
   const lastSave = useRef(0);
 
   const data = info.data;
@@ -80,8 +81,6 @@ function SeriesDetailPage() {
     setCurrent(ep);
     setStart(startAt);
   };
-
-  const [start, setStart] = useState(0);
 
   const handleNext = () => {
     if (!current) return;
