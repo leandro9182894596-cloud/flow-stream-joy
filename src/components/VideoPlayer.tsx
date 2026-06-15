@@ -32,6 +32,10 @@ interface VideoPlayerProps {
   onEnded?: () => void;
   onNext?: () => void;
   nextLabel?: string;
+  onPrev?: () => void;
+  prevLabel?: string;
+  /** When true, playback auto-enters fullscreen + landscape on mobile/devices. */
+  lockLandscape?: boolean;
 }
 
 interface TrackOption {
