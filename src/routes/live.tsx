@@ -1,9 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Loader2, Tv, Search, Heart } from "lucide-react";
+import { Loader2, Tv, Search, Heart, ChevronRight, ArrowLeft } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { VideoPlayer } from "../components/VideoPlayer";
-import { CategoryBar } from "../components/CategoryBar";
 import { useRequireAccount } from "../hooks/use-require-account";
 import { useCachedQuery, accountKey } from "../lib/queries";
 import { getLiveCategories, getLiveStreams, liveStreamUrl, proxiedImage, type LiveStream } from "../lib/xtream";
