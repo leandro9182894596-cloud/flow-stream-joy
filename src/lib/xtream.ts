@@ -386,9 +386,12 @@ function proxiedUrl(absoluteUrl: string): string {
   return `/api/public/stream?url=${encodeURIComponent(absoluteUrl)}${hls}`;
 }
 
+// Live channels: most Xtream panels stream live as MPEG-TS (.ts). Use it as the
+// primary source (played via mpegts.js); the player falls back to HLS (.m3u8)
+// automatically if the panel only serves HLS for live.
 export function liveStreamUrl(a: Account, streamId: number): string {
   return proxiedUrl(
-    `${a.base}/live/${encodeURIComponent(a.username)}/${encodeURIComponent(a.password)}/${streamId}.m3u8`,
+    `${a.base}/live/${encodeURIComponent(a.username)}/${encodeURIComponent(a.password)}/${streamId}.ts`,
   );
 }
 export function vodStreamUrl(a: Account, streamId: number, ext = "mp4"): string {
