@@ -638,6 +638,12 @@ export function VideoPlayer({
 
           <div className="flex-1" />
 
+          {onPrev && (
+            <CtrlButton onClick={onPrev} label={prevLabel || "Anterior"}>
+              <SkipBack className="h-5 w-5" />
+            </CtrlButton>
+          )}
+
           {onNext && (
             <CtrlButton onClick={onNext} label={nextLabel || "Próximo"}>
               <SkipForward className="h-5 w-5" />
