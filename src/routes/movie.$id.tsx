@@ -169,16 +169,18 @@ function MoviePage() {
                   </div>
 
                   {data?.info?.plot && (
-                    <p className="mt-6 max-w-2xl text-sm leading-relaxed text-muted-foreground">{data.info.plot}</p>
+                    <div className="mt-6 max-w-2xl rounded-xl bg-card/80 p-4 shadow-card backdrop-blur">
+                      <p className="text-sm leading-relaxed text-foreground/90">{data.info.plot}</p>
+                    </div>
                   )}
                   {data?.info?.cast && (
-                    <p className="mt-4 text-sm text-muted-foreground">
+                    <p className="mt-4 text-sm text-foreground/80">
                       <span className="font-semibold text-foreground">Elenco: </span>
                       {data.info.cast}
                     </p>
                   )}
                   {data?.info?.director && (
-                    <p className="mt-1 text-sm text-muted-foreground">
+                    <p className="mt-1 text-sm text-foreground/80">
                       <span className="font-semibold text-foreground">Direção: </span>
                       {data.info.director}
                     </p>
