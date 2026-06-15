@@ -57,7 +57,16 @@ export const Route = createFileRoute("/api/public/xtream")({
           const timeout = setTimeout(() => controller.abort(), 20000);
           const upstream = await fetch(target.toString(), {
             signal: controller.signal,
-            headers: { "User-Agent": "FlowTV/1.0", Accept: "*/*" },
+            redirect: "follow",
+            headers: {
+              // Many Xtream panels block non-browser agents and answer with an
+              // error status, which we used to surface as a 502. Mimic a real
+              // device so different DNS providers accept the request.
+              "User-Agent":
+                "Mozilla/5.0 (Linux; Android TV) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36 FlowTV/1.0",
+              Accept: "*/*",
+              Referer: `${baseUrl.origin}/`,
+            },
           });
           clearTimeout(timeout);
 
