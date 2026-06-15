@@ -70,6 +70,18 @@ function LivePage() {
     toast.success(added ? "Adicionado aos favoritos" : "Removido dos favoritos");
   };
 
+  const currentIndex = selected ? filtered.findIndex((c) => c.stream_id === selected.stream_id) : -1;
+  const goNext = () => {
+    if (!filtered.length) return;
+    const next = filtered[(currentIndex + 1 + filtered.length) % filtered.length];
+    setSelected(next);
+  };
+  const goPrev = () => {
+    if (!filtered.length) return;
+    const prev = filtered[(currentIndex - 1 + filtered.length) % filtered.length];
+    setSelected(prev);
+  };
+
   return (
     <AppShell>
       <div className="grid gap-6 px-4 py-6 lg:grid-cols-[1fr_380px] lg:px-12">
