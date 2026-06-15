@@ -357,7 +357,7 @@ export function proxiedImage(url?: string): string | undefined {
 }
 
 export function imageCandidates(url?: string): string[] {
-  if (!url) return undefined;
+  if (!url) return [];
   const u = url.trim();
   if (!u) return [];
   if (u.startsWith("data:") || u.startsWith("blob:") || u.startsWith("/api/public/stream")) return [u];
