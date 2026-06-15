@@ -36,6 +36,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       {hasBg && (
         <div className="pointer-events-none fixed inset-0 z-0">
           <img src={settings.background} alt="" className="h-full w-full object-cover" />
+          {/* Dark scrim keeps the background visible but text readable on all devices */}
+          <div className="absolute inset-0 bg-background/85" />
         </div>
       )}
       <div className="relative z-10 flex min-h-screen w-full">
