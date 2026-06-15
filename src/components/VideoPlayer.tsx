@@ -349,10 +349,32 @@ export function VideoPlayer({
 
   // ---- fullscreen ----
   useEffect(() => {
-    const onFs = () => setFullscreen(!!document.fullscreenElement);
+    const onFs = () => {
+      const isFs = !!document.fullscreenElement;
+      setFullscreen(isFs);
+      // Lock to landscape while fullscreen (mobile), release when leaving.
+      const orientation = (screen as unknown as { orientation?: { lock?: (o: string) => Promise<void>; unlock?: () => void } }).orientation;
+      try {
+        if (isFs) orientation?.lock?.("landscape").catch(() => {});
+        else orientation?.unlock?.();
+      } catch {
+        /* ignore — not supported on this device */
+      }
+    };
     document.addEventListener("fullscreenchange", onFs);
     return () => document.removeEventListener("fullscreenchange", onFs);
   }, []);
+
+  // ---- auto fullscreen + landscape when playback starts (movies/series) ----
+  const autoFsDone = useRef(false);
+  useEffect(() => {
+    if (!lockLandscape || autoFsDone.current || !playing) return;
+    autoFsDone.current = true;
+    const el = containerRef.current;
+    if (el && !document.fullscreenElement) {
+      el.requestFullscreen().catch(() => {});
+    }
+  }, [playing, lockLandscape]);
 
   const showControls = useCallback(() => {
     setControlsVisible(true);
