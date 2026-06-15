@@ -218,7 +218,9 @@ function SeriesDetailPage() {
                 </div>
 
                 {data?.info?.plot && (
-                  <p className="mt-6 max-w-2xl text-sm leading-relaxed text-muted-foreground">{data.info.plot}</p>
+                  <div className="mt-6 max-w-2xl rounded-xl bg-card/80 p-4 shadow-card backdrop-blur">
+                    <p className="text-sm leading-relaxed text-foreground/90">{data.info.plot}</p>
+                  </div>
                 )}
 
                 {/* Seasons + episodes */}
