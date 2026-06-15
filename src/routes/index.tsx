@@ -4,10 +4,11 @@ import { Play, Info, Loader2, History, X, Check, AlertCircle } from "lucide-reac
 import { motion } from "framer-motion";
 import { AppShell } from "../components/AppShell";
 import { ContentCard } from "../components/ContentCard";
+import { SeriesCard } from "../components/SeriesCard";
 import { useRequireAccount } from "../hooks/use-require-account";
 import { useSettings } from "../hooks/use-settings";
 import { useCachedQuery, accountKey } from "../lib/queries";
-import { getVodStreams, getSeries, getLiveStreams, proxiedImage } from "../lib/xtream";
+import { getVodStreams, getSeries, getLiveStreams, proxiedImage, type Account, type SeriesItem } from "../lib/xtream";
 import { loadProgress, removeProgress, type ProgressEntry } from "../lib/storage";
 import { useState, useEffect } from "react";
 
@@ -161,18 +162,7 @@ function HomePage() {
           }))}
         />
 
-        <RowSection
-          title="Séries populares"
-          loading={series.isLoading && !series.data}
-          to="/series"
-          items={(series.data ?? []).slice(0, 18).map((s) => ({
-            id: s.series_id,
-            to: "/series/$id",
-            title: s.name,
-            image: s.cover,
-            rating: s.rating,
-          }))}
-        />
+        <SeriesHomeRow loading={series.isLoading && !series.data} items={(series.data ?? []).slice(0, 18)} account={account} cacheKey={key} />
 
         <RowSection
           title="Canais ao vivo"
@@ -265,6 +255,46 @@ function RowSection({
                 rating={item.rating}
                 wide={wide}
               />
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function SeriesHomeRow({
+  items,
+  loading,
+  account,
+  cacheKey,
+}: {
+  items: SeriesItem[];
+  loading: boolean;
+  account: Account;
+  cacheKey: string;
+}) {
+  return (
+    <section>
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="font-display text-xl font-bold">Séries populares</h2>
+        <Link to="/series" className="focusable text-sm font-medium text-primary hover:underline">
+          Ver tudo
+        </Link>
+      </div>
+      {loading ? (
+        <div className="flex gap-4 overflow-hidden">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="aspect-[2/3] w-32 shrink-0 animate-pulse rounded-xl bg-card sm:w-40" />
+          ))}
+        </div>
+      ) : items.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Nenhum conteúdo disponível.</p>
+      ) : (
+        <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
+          {items.map((item) => (
+            <div key={item.series_id} className="w-32 shrink-0 sm:w-40">
+              <SeriesCard account={account} cacheKey={cacheKey} series={item} />
             </div>
           ))}
         </div>

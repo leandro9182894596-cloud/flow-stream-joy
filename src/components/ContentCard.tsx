@@ -1,26 +1,55 @@
 import { Link } from "@tanstack/react-router";
 import { Play, ImageOff } from "lucide-react";
-import { useEffect, useState } from "react";
-import { proxiedImage } from "../lib/xtream";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { imageCandidates } from "../lib/xtream";
 
 interface ContentCardProps {
   to: string;
   params?: Record<string, string>;
   title: string;
   image?: string;
+  fallbackImage?: string;
+  onImageUnavailable?: () => void;
   subtitle?: string;
   rating?: string;
   progress?: number; // 0..1
   wide?: boolean; // landscape (channels)
 }
 
-export function ContentCard({ to, params, title, image, subtitle, rating, progress, wide }: ContentCardProps) {
+export function ContentCard({ to, params, title, image, fallbackImage, onImageUnavailable, subtitle, rating, progress, wide }: ContentCardProps) {
   const [failed, setFailed] = useState(false);
-  const src = proxiedImage(image);
+  const [sourceIndex, setSourceIndex] = useState(0);
+  const notified = useRef(false);
+  const sources = useMemo(() => {
+    const all = [...imageCandidates(image), ...imageCandidates(fallbackImage)];
+    return Array.from(new Set(all.filter(Boolean)));
+  }, [image, fallbackImage]);
+  const src = sources[sourceIndex];
 
   useEffect(() => {
     setFailed(false);
-  }, [src]);
+    setSourceIndex(0);
+    notified.current = false;
+  }, [sources.join("|")]);
+
+  useEffect(() => {
+    if (sources.length === 0 && !notified.current) {
+      notified.current = true;
+      onImageUnavailable?.();
+    }
+  }, [onImageUnavailable, sources.length]);
+
+  const handleImageError = () => {
+    if (sourceIndex < sources.length - 1) {
+      setSourceIndex((idx) => idx + 1);
+      return;
+    }
+    setFailed(true);
+    if (!notified.current) {
+      notified.current = true;
+      onImageUnavailable?.();
+    }
+  };
 
   return (
     <Link
@@ -38,7 +67,7 @@ export function ContentCard({ to, params, title, image, subtitle, rating, progre
             src={src}
             alt={title}
             loading="lazy"
-            onError={() => setFailed(true)}
+            onError={handleImageError}
             className={`h-full w-full ${wide ? "object-contain p-3" : "object-cover"} transition-transform duration-300 group-hover:scale-105`}
           />
         ) : (
