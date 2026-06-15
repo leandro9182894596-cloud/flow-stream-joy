@@ -257,7 +257,10 @@ export function VideoPlayer({
                 hls.destroy();
             }
           });
-          hls.on(HlsMod.Events.FRAG_LOADED, () => setReconnecting(false));
+          hls.on(HlsMod.Events.FRAG_LOADED, () => {
+            reconnectAttempts.current = 0;
+            setReconnecting(false);
+          });
         } else if (video!.canPlayType("application/vnd.apple.mpegurl")) {
           // Native HLS (Safari/iOS)
           video!.src = source.url;
