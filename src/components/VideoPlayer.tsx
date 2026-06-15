@@ -9,6 +9,7 @@ import {
   Minimize,
   Settings,
   SkipForward,
+  SkipBack,
   Loader2,
   RotateCcw,
   Wifi,
