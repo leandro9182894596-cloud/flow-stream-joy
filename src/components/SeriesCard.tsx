@@ -16,7 +16,7 @@ export function SeriesCard({ account, cacheKey, series }: SeriesCardProps) {
     () => getSeriesInfo(account, series.series_id),
     { enabled: needsDetails, maxAgeMs: 24 * 60 * 60 * 1000 },
   );
-  const fallbackImage = details.data ? bestSeriesImage(details.data) : undefined;
+  const fallbackImage = details.data ? bestSeriesImage(details.data, series.cover) : undefined;
 
   return (
     <ContentCard
@@ -31,11 +31,11 @@ export function SeriesCard({ account, cacheKey, series }: SeriesCardProps) {
   );
 }
 
-function bestSeriesImage(data: SeriesInfo): string | undefined {
-  if (data.info?.cover) return data.info.cover;
+function bestSeriesImage(data: SeriesInfo, currentCover?: string): string | undefined {
+  if (data.info?.cover && data.info.cover !== currentCover) return data.info.cover;
   for (const episodes of Object.values(data.episodes ?? {})) {
     const image = episodes.find((ep) => ep.info?.movie_image)?.info?.movie_image;
     if (image) return image;
   }
-  return undefined;
+  return data.info?.cover;
 }

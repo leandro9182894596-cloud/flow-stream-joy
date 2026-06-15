@@ -8,7 +8,7 @@ import { SeriesCard } from "../components/SeriesCard";
 import { useRequireAccount } from "../hooks/use-require-account";
 import { useSettings } from "../hooks/use-settings";
 import { useCachedQuery, accountKey } from "../lib/queries";
-import { getVodStreams, getSeries, getLiveStreams, proxiedImage } from "../lib/xtream";
+import { getVodStreams, getSeries, getLiveStreams, proxiedImage, type Account, type SeriesItem } from "../lib/xtream";
 import { loadProgress, removeProgress, type ProgressEntry } from "../lib/storage";
 import { useState, useEffect } from "react";
 
@@ -269,9 +269,9 @@ function SeriesHomeRow({
   account,
   cacheKey,
 }: {
-  items: NonNullable<ReturnType<typeof getSeries> extends Promise<infer T> ? T : never>;
+  items: SeriesItem[];
   loading: boolean;
-  account: NonNullable<ReturnType<typeof useRequireAccount>["account"]>;
+  account: Account;
   cacheKey: string;
 }) {
   return (
