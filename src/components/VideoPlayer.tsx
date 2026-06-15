@@ -101,6 +101,7 @@ export function VideoPlayer({
   const hlsRef = useRef<Hls | null>(null);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectAttempts = useRef(0);
 
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(true);
