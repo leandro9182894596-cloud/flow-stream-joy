@@ -99,6 +99,7 @@ function MoviePage() {
             poster={poster}
             startPosition={resume?.position ?? 0}
             onProgress={handleProgress}
+            lockLandscape
           />
         </div>
       ) : (
