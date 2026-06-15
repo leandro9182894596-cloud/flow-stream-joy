@@ -90,9 +90,21 @@ function LivePage() {
     setSelected(prev);
   };
 
+  const allCategories = [
+    { category_id: "all", category_name: "Todos os canais" },
+    ...(categories.data ?? []),
+  ];
+  const activeCatName =
+    allCategories.find((c) => c.category_id === cat)?.category_name ?? "Canais";
+
+  const pickCategory = (id: string) => {
+    setCat(id);
+    setShowChannels(true);
+  };
+
   return (
     <AppShell>
-      <div className="grid gap-6 px-4 py-6 lg:grid-cols-[1fr_380px] lg:px-12">
+      <div className="grid gap-6 px-4 py-6 lg:grid-cols-[1fr_240px_340px] lg:px-12">
         {/* Player */}
         <div className="lg:sticky lg:top-20 lg:h-fit">
           {selected ? (
@@ -139,8 +151,52 @@ function LivePage() {
           )}
         </div>
 
+        {/* Category selection */}
+        <div className={`min-w-0 ${showChannels ? "hidden lg:block" : "block"}`}>
+          <h2 className="mb-3 font-display text-lg font-bold">Seleções</h2>
+          {categories.isLoading && !categories.data ? (
+            <div className="space-y-2">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="h-11 animate-pulse rounded-lg bg-card" />
+              ))}
+            </div>
+          ) : (
+            <ul className="max-h-[60vh] space-y-1 overflow-y-auto pr-1 lg:max-h-[calc(100vh-200px)]">
+              {allCategories.map((c) => (
+                <li key={c.category_id}>
+                  <button
+                    onClick={() => pickCategory(c.category_id)}
+                    className={`focusable flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-colors ${
+                      cat === c.category_id
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-transparent bg-card hover:border-primary/40"
+                    }`}
+                  >
+                    <span className="line-clamp-1">{c.category_name}</span>
+                    <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
+                      {c.category_id === "all"
+                        ? channels.data?.length ?? 0
+                        : countByCat.get(c.category_id) ?? 0}
+                      <ChevronRight className="h-4 w-4" />
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         {/* Channel list */}
-        <div className="min-w-0">
+        <div className={`min-w-0 ${showChannels ? "block" : "hidden lg:block"}`}>
+          <div className="mb-3 flex items-center gap-2">
+            <button
+              onClick={() => setShowChannels(false)}
+              className="focusable inline-flex shrink-0 items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-2 text-sm font-medium lg:hidden"
+            >
+              <ArrowLeft className="h-4 w-4" /> Seleções
+            </button>
+            <h2 className="line-clamp-1 font-display text-lg font-bold">{activeCatName}</h2>
+          </div>
           <div className="mb-3 flex items-center gap-2 rounded-xl border border-input bg-secondary/50 px-3.5 py-2.5">
             <Search className="h-4 w-4 text-muted-foreground" />
             <input
@@ -150,16 +206,19 @@ function LivePage() {
               className="w-full bg-transparent text-sm focus:outline-none"
             />
           </div>
-          <CategoryBar categories={categories.data ?? []} value={cat} onChange={setCat} />
 
           {channels.isLoading && !channels.data ? (
-            <div className="mt-4 space-y-2">
+            <div className="space-y-2">
               {Array.from({ length: 10 }).map((_, i) => (
                 <div key={i} className="h-14 animate-pulse rounded-lg bg-card" />
               ))}
             </div>
+          ) : filtered.length === 0 ? (
+            <p className="rounded-lg bg-card p-4 text-sm text-muted-foreground">
+              Nenhum canal nesta seleção.
+            </p>
           ) : (
-            <ul className="mt-4 max-h-[60vh] space-y-1 overflow-y-auto pr-1 lg:max-h-[calc(100vh-220px)]">
+            <ul className="max-h-[60vh] space-y-1 overflow-y-auto pr-1 lg:max-h-[calc(100vh-280px)]">
               {filtered.map((c) => (
                 <li key={c.stream_id}>
                   <button
