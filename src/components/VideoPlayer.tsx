@@ -219,16 +219,31 @@ export function VideoPlayer({
             if (!data.fatal) return;
             switch (data.type) {
               case HlsMod.ErrorTypes.NETWORK_ERROR:
-                // Auto-reconnect
+                // Auto-reconnect with escalating recovery. After a few quick
+                // retries we fully reload the source — this rescues providers
+                // (often on a different DNS) whose manifest token went stale.
                 setReconnecting(true);
+                reconnectAttempts.current += 1;
                 if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+                if (reconnectAttempts.current > 12) {
+                  setError("Este canal não respondeu. Tente outro canal ou recarregue.");
+                  hls.destroy();
+                  break;
+                }
                 reconnectTimer.current = setTimeout(() => {
                   try {
-                    hls.startLoad();
+                    if (reconnectAttempts.current <= 4) {
+                      hls.startLoad();
+                    } else {
+                      // Hard reload of the stream from scratch.
+                      hls.stopLoad();
+                      hls.loadSource(source.url);
+                      hls.startLoad();
+                    }
                   } catch {
                     /* ignore */
                   }
-                }, 1500);
+                }, Math.min(1200 * reconnectAttempts.current, 5000));
                 break;
               case HlsMod.ErrorTypes.MEDIA_ERROR:
                 try {
