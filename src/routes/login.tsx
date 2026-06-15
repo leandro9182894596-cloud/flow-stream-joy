@@ -92,13 +92,13 @@ function LoginPage() {
           onSubmit={onSubmit}
           className="space-y-4 rounded-2xl border border-border bg-card/80 p-6 shadow-card backdrop-blur"
         >
-          {dnsList.length === 0 && (
+          {mounted && dnsList.length === 0 && (
             <p className="rounded-xl border border-destructive/40 bg-destructive/10 px-3.5 py-3 text-xs text-destructive">
               Nenhuma DNS configurada. Acesse a página de Admin para cadastrar o servidor.
             </p>
           )}
 
-          {dnsList.length > 1 && (
+          {mounted && dnsList.length > 1 && (
             <div className="rounded-xl border border-primary/30 bg-primary/10 px-3.5 py-3 text-xs text-foreground">
               <div className="flex items-start gap-2">
                 <Server className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
