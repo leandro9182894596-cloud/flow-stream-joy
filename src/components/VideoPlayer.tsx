@@ -92,6 +92,9 @@ export function VideoPlayer({
   onEnded,
   onNext,
   nextLabel,
+  onPrev,
+  prevLabel,
+  lockLandscape = false,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
