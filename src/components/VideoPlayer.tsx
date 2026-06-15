@@ -9,6 +9,7 @@ import {
   Minimize,
   Settings,
   SkipForward,
+  SkipBack,
   Loader2,
   RotateCcw,
   Wifi,
@@ -31,6 +32,10 @@ interface VideoPlayerProps {
   onEnded?: () => void;
   onNext?: () => void;
   nextLabel?: string;
+  onPrev?: () => void;
+  prevLabel?: string;
+  /** When true, playback auto-enters fullscreen + landscape on mobile/devices. */
+  lockLandscape?: boolean;
 }
 
 interface TrackOption {
@@ -87,12 +92,16 @@ export function VideoPlayer({
   onEnded,
   onNext,
   nextLabel,
+  onPrev,
+  prevLabel,
+  lockLandscape = false,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectAttempts = useRef(0);
 
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -210,16 +219,31 @@ export function VideoPlayer({
             if (!data.fatal) return;
             switch (data.type) {
               case HlsMod.ErrorTypes.NETWORK_ERROR:
-                // Auto-reconnect
+                // Auto-reconnect with escalating recovery. After a few quick
+                // retries we fully reload the source — this rescues providers
+                // (often on a different DNS) whose manifest token went stale.
                 setReconnecting(true);
+                reconnectAttempts.current += 1;
                 if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+                if (reconnectAttempts.current > 12) {
+                  setError("Este canal não respondeu. Tente outro canal ou recarregue.");
+                  hls.destroy();
+                  break;
+                }
                 reconnectTimer.current = setTimeout(() => {
                   try {
-                    hls.startLoad();
+                    if (reconnectAttempts.current <= 4) {
+                      hls.startLoad();
+                    } else {
+                      // Hard reload of the stream from scratch.
+                      hls.stopLoad();
+                      hls.loadSource(source.url);
+                      hls.startLoad();
+                    }
                   } catch {
                     /* ignore */
                   }
-                }, 1500);
+                }, Math.min(1200 * reconnectAttempts.current, 5000));
                 break;
               case HlsMod.ErrorTypes.MEDIA_ERROR:
                 try {
@@ -233,7 +257,10 @@ export function VideoPlayer({
                 hls.destroy();
             }
           });
-          hls.on(HlsMod.Events.FRAG_LOADED, () => setReconnecting(false));
+          hls.on(HlsMod.Events.FRAG_LOADED, () => {
+            reconnectAttempts.current = 0;
+            setReconnecting(false);
+          });
         } else if (video!.canPlayType("application/vnd.apple.mpegurl")) {
           // Native HLS (Safari/iOS)
           video!.src = source.url;
@@ -341,10 +368,32 @@ export function VideoPlayer({
 
   // ---- fullscreen ----
   useEffect(() => {
-    const onFs = () => setFullscreen(!!document.fullscreenElement);
+    const onFs = () => {
+      const isFs = !!document.fullscreenElement;
+      setFullscreen(isFs);
+      // Lock to landscape while fullscreen (mobile), release when leaving.
+      const orientation = (screen as unknown as { orientation?: { lock?: (o: string) => Promise<void>; unlock?: () => void } }).orientation;
+      try {
+        if (isFs) orientation?.lock?.("landscape").catch(() => {});
+        else orientation?.unlock?.();
+      } catch {
+        /* ignore — not supported on this device */
+      }
+    };
     document.addEventListener("fullscreenchange", onFs);
     return () => document.removeEventListener("fullscreenchange", onFs);
   }, []);
+
+  // ---- auto fullscreen + landscape when playback starts (movies/series) ----
+  const autoFsDone = useRef(false);
+  useEffect(() => {
+    if (!lockLandscape || autoFsDone.current || !playing) return;
+    autoFsDone.current = true;
+    const el = containerRef.current;
+    if (el && !document.fullscreenElement) {
+      el.requestFullscreen().catch(() => {});
+    }
+  }, [playing, lockLandscape]);
 
   const showControls = useCallback(() => {
     setControlsVisible(true);
@@ -607,6 +656,12 @@ export function VideoPlayer({
           </div>
 
           <div className="flex-1" />
+
+          {onPrev && (
+            <CtrlButton onClick={onPrev} label={prevLabel || "Anterior"}>
+              <SkipBack className="h-5 w-5" />
+            </CtrlButton>
+          )}
 
           {onNext && (
             <CtrlButton onClick={onNext} label={nextLabel || "Próximo"}>

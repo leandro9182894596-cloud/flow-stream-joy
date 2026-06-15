@@ -157,6 +157,7 @@ function SeriesDetailPage() {
             onEnded={handleNext}
             onNext={handleNext}
             nextLabel="Próximo episódio"
+            lockLandscape
           />
         </div>
       ) : (

@@ -70,6 +70,18 @@ function LivePage() {
     toast.success(added ? "Adicionado aos favoritos" : "Removido dos favoritos");
   };
 
+  const currentIndex = selected ? filtered.findIndex((c) => c.stream_id === selected.stream_id) : -1;
+  const goNext = () => {
+    if (!filtered.length) return;
+    const next = filtered[(currentIndex + 1 + filtered.length) % filtered.length];
+    setSelected(next);
+  };
+  const goPrev = () => {
+    if (!filtered.length) return;
+    const prev = filtered[(currentIndex - 1 + filtered.length) % filtered.length];
+    setSelected(prev);
+  };
+
   return (
     <AppShell>
       <div className="grid gap-6 px-4 py-6 lg:grid-cols-[1fr_380px] lg:px-12">
@@ -82,7 +94,25 @@ function LivePage() {
                 source={{ url: liveStreamUrl(account, selected.stream_id), isLive: true }}
                 title={selected.name}
                 poster={proxiedImage(selected.stream_icon)}
+                onNext={filtered.length > 1 ? goNext : undefined}
+                nextLabel="Próximo canal"
+                onPrev={filtered.length > 1 ? goPrev : undefined}
+                prevLabel="Canal anterior"
               />
+              <div className="mt-3 flex items-center gap-2 lg:hidden">
+                <button
+                  onClick={goPrev}
+                  className="focusable flex flex-1 items-center justify-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:border-primary/50"
+                >
+                  ‹ Anterior
+                </button>
+                <button
+                  onClick={goNext}
+                  className="focusable flex flex-1 items-center justify-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:border-primary/50"
+                >
+                  Próximo ›
+                </button>
+              </div>
               <div className="mt-3 flex items-center justify-between">
                 <h1 className="font-display text-xl font-bold">{selected.name}</h1>
                 <button
