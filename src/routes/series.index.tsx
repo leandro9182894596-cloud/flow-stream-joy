@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Loader2, Clapperboard } from "lucide-react";
 import { AppShell } from "../components/AppShell";
-import { ContentCard } from "../components/ContentCard";
+import { SeriesCard } from "../components/SeriesCard";
 import { useRequireAccount } from "../hooks/use-require-account";
 import { useCachedQuery, accountKey } from "../lib/queries";
 import { getSeriesCategories, getSeries } from "../lib/xtream";
@@ -67,14 +67,7 @@ function SeriesPage() {
           <>
             <Grid>
               {filtered.slice(0, visible).map((s) => (
-                <ContentCard
-                  key={s.series_id}
-                  to="/series/$id"
-                  params={{ id: String(s.series_id) }}
-                  title={s.name}
-                  image={s.cover}
-                  rating={s.rating}
-                />
+                <SeriesCard key={s.series_id} account={account} cacheKey={key} series={s} />
               ))}
             </Grid>
             {visible < filtered.length && (

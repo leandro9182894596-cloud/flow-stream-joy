@@ -201,6 +201,11 @@ export interface SeriesItem {
   series_id: number;
   name: string;
   cover: string;
+  cover_big?: string;
+  movie_image?: string;
+  stream_icon?: string;
+  poster_path?: string;
+  image?: string;
   category_id: string;
   rating?: string;
   plot?: string;
@@ -303,7 +308,12 @@ function normalizeVodStreams(list: VodStream[], base: string): VodStream[] {
 }
 
 function normalizeSeriesList(list: SeriesItem[], base: string): SeriesItem[] {
-  return Array.isArray(list) ? list.map((item) => ({ ...item, cover: normalizeMediaUrl(item.cover, base) })) : [];
+  return Array.isArray(list)
+    ? list.map((item) => {
+        const cover = item.cover || item.cover_big || item.movie_image || item.stream_icon || item.poster_path || item.image;
+        return { ...item, cover: normalizeMediaUrl(cover, base) };
+      })
+    : [];
 }
 
 function normalizeVodInfo(data: VodInfo, base: string): VodInfo {
@@ -343,12 +353,18 @@ function normalizeSeriesInfo(data: SeriesInfo, base: string): SeriesInfo {
 // on HTTPS, so the browser blocks them as mixed content and the images never
 // appear. Route HTTP images through the HTTPS media proxy so they always load.
 export function proxiedImage(url?: string): string | undefined {
+  return imageCandidates(url)[0];
+}
+
+export function imageCandidates(url?: string): string[] {
   if (!url) return undefined;
   const u = url.trim();
-  if (!u || u.startsWith("data:") || u.startsWith("blob:") || u.startsWith("/api/public/stream")) return u || undefined;
+  if (!u) return [];
+  if (u.startsWith("data:") || u.startsWith("blob:") || u.startsWith("/api/public/stream")) return [u];
   // Keep SSR and browser markup equal, and route remote covers through our HTTPS proxy.
-  if (/^https?:\/\//i.test(u)) return `/api/public/stream?url=${encodeURIComponent(u)}`;
-  return u;
+  if (/^https:\/\//i.test(u)) return [`/api/public/stream?url=${encodeURIComponent(u)}&kind=image`, u];
+  if (/^http:\/\//i.test(u)) return [`/api/public/stream?url=${encodeURIComponent(u)}&kind=image`];
+  return [u];
 }
 
 function proxiedUrl(absoluteUrl: string): string {

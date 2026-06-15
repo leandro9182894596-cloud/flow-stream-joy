@@ -3,7 +3,7 @@ import { getCache, setCache } from "./storage";
 import type { Account } from "./xtream";
 
 const HOUR = 60 * 60 * 1000;
-const CONTENT_CACHE_VERSION = "covers-v2";
+const CONTENT_CACHE_VERSION = "covers-v3";
 
 /**
  * react-query + localStorage cache combo for instant loads and offline resilience.

@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Search as SearchIcon, Loader2 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { ContentCard } from "../components/ContentCard";
+import { SeriesCard } from "../components/SeriesCard";
 import { Grid } from "./movies";
 import { useRequireAccount } from "../hooks/use-require-account";
 import { useCachedQuery, accountKey } from "../lib/queries";
@@ -82,7 +83,7 @@ function SearchPage() {
             {results.series.length > 0 && (
               <Section title="Séries">
                 {results.series.map((s) => (
-                  <ContentCard key={s.series_id} to="/series/$id" params={{ id: String(s.series_id) }} title={s.name} image={s.cover} rating={s.rating} />
+                  <SeriesCard key={s.series_id} account={account} cacheKey={key} series={s} />
                 ))}
               </Section>
             )}
