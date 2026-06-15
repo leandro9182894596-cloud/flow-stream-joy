@@ -137,7 +137,21 @@ export function VideoPlayer({
     setError(null);
     setLoading(true);
 
-    const isHls = /\.m3u8($|\?)/i.test(source.url) || source.isLive;
+    const isHls = /\.m3u8($|\?)/i.test(source.url);
+
+    // Derive the HLS (.m3u8) variant of a proxied live .ts URL, used as a
+    // fallback for panels that only serve live channels over HLS.
+    const liveHlsUrl = (tsProxyUrl: string): string => {
+      try {
+        const u = new URL(tsProxyUrl, window.location.origin);
+        const target = u.searchParams.get("url");
+        if (!target) return tsProxyUrl;
+        const m3u8 = target.replace(/\.ts(\?|$)/i, ".m3u8$1");
+        return `/api/public/stream?url=${encodeURIComponent(m3u8)}&ext=.m3u8`;
+      } catch {
+        return tsProxyUrl;
+      }
+    };
 
     const seekToStart = () => {
       if (startProgressRef.current > 0 && !source.isLive) {
