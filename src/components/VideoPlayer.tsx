@@ -163,130 +163,165 @@ export function VideoPlayer({
       }
     };
 
-    async function setup() {
-      if (isHls) {
-        const HlsMod = (await import("hls.js")).default;
-        if (cancelled) return;
-        if (HlsMod.isSupported()) {
-          const live = !!source.isLive;
-          const hls = new HlsMod({
-            // Larger buffer keeps live TV smooth on unstable connections.
-            maxBufferLength: live ? 60 : 30,
-            maxMaxBufferLength: live ? 180 : 120,
-            backBufferLength: live ? 60 : 30,
-            maxBufferSize: 120 * 1000 * 1000,
-            maxBufferHole: 0.5,
-            // Adaptive bitrate based on measured bandwidth.
-            abrEwmaDefaultEstimate: 1_000_000,
-            startLevel: -1,
-            // Low-latency mode causes stutter on weak links — keep it off and
-            // hold a healthy live buffer instead.
-            lowLatencyMode: false,
-            liveSyncDurationCount: 4,
-            liveMaxLatencyDurationCount: 12,
-            // Robust recovery
-            fragLoadingMaxRetry: 8,
-            manifestLoadingMaxRetry: 8,
-            levelLoadingMaxRetry: 8,
-            fragLoadingRetryDelay: 1000,
-          });
-          hlsRef.current = hls;
-          hls.loadSource(source.url);
-          hls.attachMedia(video!);
+    async function setupHls(url: string) {
+      const HlsMod = (await import("hls.js")).default;
+      if (cancelled) return;
+      if (HlsMod.isSupported()) {
+        const live = !!source.isLive;
+        const hls = new HlsMod({
+          // Larger buffer keeps live TV smooth on unstable connections.
+          maxBufferLength: live ? 60 : 30,
+          maxMaxBufferLength: live ? 180 : 120,
+          backBufferLength: live ? 60 : 30,
+          maxBufferSize: 120 * 1000 * 1000,
+          maxBufferHole: 0.5,
+          abrEwmaDefaultEstimate: 1_000_000,
+          startLevel: -1,
+          lowLatencyMode: false,
+          liveSyncDurationCount: 4,
+          liveMaxLatencyDurationCount: 12,
+          fragLoadingMaxRetry: 8,
+          manifestLoadingMaxRetry: 8,
+          levelLoadingMaxRetry: 8,
+          fragLoadingRetryDelay: 1000,
+        });
+        hlsRef.current = hls;
+        hls.loadSource(url);
+        hls.attachMedia(video!);
 
-          hls.on(HlsMod.Events.MANIFEST_PARSED, () => {
-            setLevels(
-              hls.levels.map((l, i) => ({
-                id: i,
-                label: qualityLabel(l.height, l.bitrate),
-                height: l.height,
-              })),
-            );
-            // Apply saved quality preference (match by resolution height).
-            try {
-              const pref = localStorage.getItem(QUALITY_PREF_KEY);
-              if (pref && pref !== "auto") {
-                const idx = hls.levels.findIndex((l) => l.height === Number(pref));
-                if (idx >= 0) {
-                  hls.currentLevel = idx;
-                  setCurrentLevel(idx);
-                }
+        hls.on(HlsMod.Events.MANIFEST_PARSED, () => {
+          setLevels(
+            hls.levels.map((l, i) => ({
+              id: i,
+              label: qualityLabel(l.height, l.bitrate),
+              height: l.height,
+            })),
+          );
+          try {
+            const pref = localStorage.getItem(QUALITY_PREF_KEY);
+            if (pref && pref !== "auto") {
+              const idx = hls.levels.findIndex((l) => l.height === Number(pref));
+              if (idx >= 0) {
+                hls.currentLevel = idx;
+                setCurrentLevel(idx);
               }
-            } catch {
-              /* ignore */
             }
-            setLoading(false);
-            seekToStart();
-            if (autoPlay) video!.play().catch(() => setPlaying(false));
-          });
-          hls.on(HlsMod.Events.LEVEL_SWITCHED, (_e, d) => {
-            setCurrentLevel(hls.autoLevelEnabled ? -1 : d.level);
-            setActiveHeight(hls.levels[d.level]?.height || 0);
-          });
-          hls.on(HlsMod.Events.AUDIO_TRACKS_UPDATED, () => {
-            setAudioTracks(hls.audioTracks.map((t, i) => ({ id: i, label: t.name || t.lang || `Áudio ${i + 1}` })));
-          });
-          hls.on(HlsMod.Events.AUDIO_TRACK_SWITCHED, (_e, d) => setCurrentAudio(d.id));
-          hls.on(HlsMod.Events.SUBTITLE_TRACKS_UPDATED, () => {
-            setSubTracks(hls.subtitleTracks.map((t, i) => ({ id: i, label: t.name || t.lang || `Legenda ${i + 1}` })));
-          });
-          hls.on(HlsMod.Events.ERROR, (_e, data) => {
-            if (!data.fatal) return;
-            switch (data.type) {
-              case HlsMod.ErrorTypes.NETWORK_ERROR:
-                // Auto-reconnect with escalating recovery. After a few quick
-                // retries we fully reload the source — this rescues providers
-                // (often on a different DNS) whose manifest token went stale.
-                setReconnecting(true);
-                reconnectAttempts.current += 1;
-                if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
-                if (reconnectAttempts.current > 12) {
-                  setError("Este canal não respondeu. Tente outro canal ou recarregue.");
-                  hls.destroy();
-                  break;
-                }
-                reconnectTimer.current = setTimeout(() => {
-                  try {
-                    if (reconnectAttempts.current <= 4) {
-                      hls.startLoad();
-                    } else {
-                      // Hard reload of the stream from scratch.
-                      hls.stopLoad();
-                      hls.loadSource(source.url);
-                      hls.startLoad();
-                    }
-                  } catch {
-                    /* ignore */
-                  }
-                }, Math.min(1200 * reconnectAttempts.current, 5000));
-                break;
-              case HlsMod.ErrorTypes.MEDIA_ERROR:
-                try {
-                  hls.recoverMediaError();
-                } catch {
-                  setError("Erro de mídia. Tente recarregar.");
-                }
-                break;
-              default:
-                setError("Não foi possível reproduzir este conteúdo.");
+          } catch {
+            /* ignore */
+          }
+          setLoading(false);
+          seekToStart();
+          if (autoPlay) video!.play().catch(() => setPlaying(false));
+        });
+        hls.on(HlsMod.Events.LEVEL_SWITCHED, (_e, d) => {
+          setCurrentLevel(hls.autoLevelEnabled ? -1 : d.level);
+          setActiveHeight(hls.levels[d.level]?.height || 0);
+        });
+        hls.on(HlsMod.Events.AUDIO_TRACKS_UPDATED, () => {
+          setAudioTracks(hls.audioTracks.map((t, i) => ({ id: i, label: t.name || t.lang || `Áudio ${i + 1}` })));
+        });
+        hls.on(HlsMod.Events.AUDIO_TRACK_SWITCHED, (_e, d) => setCurrentAudio(d.id));
+        hls.on(HlsMod.Events.SUBTITLE_TRACKS_UPDATED, () => {
+          setSubTracks(hls.subtitleTracks.map((t, i) => ({ id: i, label: t.name || t.lang || `Legenda ${i + 1}` })));
+        });
+        hls.on(HlsMod.Events.ERROR, (_e, data) => {
+          if (!data.fatal) return;
+          switch (data.type) {
+            case HlsMod.ErrorTypes.NETWORK_ERROR:
+              setReconnecting(true);
+              reconnectAttempts.current += 1;
+              if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+              if (reconnectAttempts.current > 12) {
+                setError("Este canal não respondeu. Tente outro canal ou recarregue.");
                 hls.destroy();
-            }
-          });
-          hls.on(HlsMod.Events.FRAG_LOADED, () => {
-            reconnectAttempts.current = 0;
-            setReconnecting(false);
-          });
-        } else if (video!.canPlayType("application/vnd.apple.mpegurl")) {
-          // Native HLS (Safari/iOS)
-          video!.src = source.url;
-          video!.addEventListener("loadedmetadata", () => {
-            setLoading(false);
-            seekToStart();
-            if (autoPlay) video!.play().catch(() => setPlaying(false));
-          });
-        } else {
-          setError("Seu navegador não suporta este formato de transmissão.");
+                break;
+              }
+              reconnectTimer.current = setTimeout(() => {
+                try {
+                  if (reconnectAttempts.current <= 4) {
+                    hls.startLoad();
+                  } else {
+                    hls.stopLoad();
+                    hls.loadSource(url);
+                    hls.startLoad();
+                  }
+                } catch {
+                  /* ignore */
+                }
+              }, Math.min(1200 * reconnectAttempts.current, 5000));
+              break;
+            case HlsMod.ErrorTypes.MEDIA_ERROR:
+              try {
+                hls.recoverMediaError();
+              } catch {
+                setError("Erro de mídia. Tente recarregar.");
+              }
+              break;
+            default:
+              setError("Não foi possível reproduzir este conteúdo.");
+              hls.destroy();
+          }
+        });
+        hls.on(HlsMod.Events.FRAG_LOADED, () => {
+          reconnectAttempts.current = 0;
+          setReconnecting(false);
+        });
+      } else if (video!.canPlayType("application/vnd.apple.mpegurl")) {
+        // Native HLS (Safari/iOS)
+        video!.src = url;
+        video!.addEventListener("loadedmetadata", () => {
+          setLoading(false);
+          seekToStart();
+          if (autoPlay) video!.play().catch(() => setPlaying(false));
+        });
+      } else {
+        setError("Seu navegador não suporta este formato de transmissão.");
+      }
+    }
+
+    // Live channels: play MPEG-TS via mpegts.js; fall back to HLS on failure.
+    async function setupMpegtsLive() {
+      const mpegts = (await import("mpegts.js")).default;
+      if (cancelled) return;
+      if (!mpegts.getFeatureList().mseLivePlayback) {
+        await setupHls(liveHlsUrl(source.url));
+        return;
+      }
+      const player = mpegts.createPlayer(
+        { type: "mse", isLive: true, url: source.url },
+        { liveBufferLatencyChasing: true, enableStashBuffer: true, stashInitialSize: 1024, lazyLoad: false },
+      );
+      mpegtsRef.current = player;
+      let fellBack = false;
+      const fallback = () => {
+        if (fellBack || cancelled) return;
+        fellBack = true;
+        try {
+          player.destroy();
+        } catch {
+          /* ignore */
         }
+        mpegtsRef.current = null;
+        setupHls(liveHlsUrl(source.url));
+      };
+      player.on(mpegts.Events.ERROR, fallback);
+      player.on(mpegts.Events.MEDIA_INFO, () => setLoading(false));
+      player.attachMediaElement(video!);
+      player.load();
+      if (autoPlay) {
+        try {
+          player.play();
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+
+    async function setup() {
+      if (source.isLive) {
+        await setupMpegtsLive();
+      } else if (isHls) {
+        await setupHls(source.url);
       } else {
         // Direct MP4/TS
         video!.src = source.url;
