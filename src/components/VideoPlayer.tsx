@@ -346,6 +346,14 @@ export function VideoPlayer({
         hlsRef.current.destroy();
         hlsRef.current = null;
       }
+      if (mpegtsRef.current) {
+        try {
+          mpegtsRef.current.destroy();
+        } catch {
+          /* ignore */
+        }
+        mpegtsRef.current = null;
+      }
       video.removeAttribute("src");
       video.load();
     };
