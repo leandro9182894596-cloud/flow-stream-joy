@@ -72,9 +72,11 @@ export const Route = createFileRoute("/api/public/xtream")({
 
           const text = await upstream.text();
           if (!upstream.ok) {
+            // Return 200 with a fallback flag so the platform error boundary
+            // doesn't treat upstream failures as a fatal 5xx (blank screen).
             return json(
-              { error: "UPSTREAM_ERROR", status: upstream.status, message: "Servidor indisponível." },
-              502,
+              { error: "UPSTREAM_ERROR", status: upstream.status, message: "Servidor indisponível.", fallback: true },
+              200,
             );
           }
           // Most player_api responses are JSON; xmltv is XML.
@@ -89,8 +91,8 @@ export const Route = createFileRoute("/api/public/xtream")({
           });
         } catch {
           return json(
-            { error: "CONNECTION_FAILED", message: "Não foi possível conectar ao servidor (DNS/rede)." },
-            504,
+            { error: "CONNECTION_FAILED", message: "Não foi possível conectar ao servidor (DNS/rede).", fallback: true },
+            200,
           );
         }
       },

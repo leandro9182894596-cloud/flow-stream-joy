@@ -98,11 +98,24 @@ async function apiCall<T>(account: Account, params: Record<string, string>): Pro
     throw new FlowApiError(code);
   }
 
+  let payload: unknown;
   try {
-    return (await res.json()) as T;
+    payload = await res.json();
   } catch {
     throw new FlowApiError("UNKNOWN");
   }
+
+  // The proxy now returns HTTP 200 with an error payload for upstream/network
+  // failures (avoids platform 5xx blank-screen). Detect and map those here.
+  if (payload && typeof payload === "object" && "error" in payload) {
+    const err = payload as { error?: string };
+    let code: FlowError = "CONNECTION_FAILED";
+    if (err.error === "DNS_UNAVAILABLE" || err.error === "INVALID_INPUT") code = "DNS_UNAVAILABLE";
+    else if (err.error === "UPSTREAM_ERROR") code = "CONNECTION_FAILED";
+    throw new FlowApiError(code);
+  }
+
+  return payload as T;
 }
 
 export async function authenticate(account: Account): Promise<UserInfo> {
