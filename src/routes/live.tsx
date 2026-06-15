@@ -27,9 +27,18 @@ function LivePage() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<LiveStream | null>(null);
   const [fav, setFav] = useState(false);
+  const [showChannels, setShowChannels] = useState(false);
 
   const categories = useCachedQuery(`${key}:livecats`, () => getLiveCategories(account!), { enabled: !!account });
   const channels = useCachedQuery(`${key}:live:all`, () => getLiveStreams(account!), { enabled: !!account });
+
+  const countByCat = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const c of channels.data ?? []) {
+      map.set(c.category_id, (map.get(c.category_id) ?? 0) + 1);
+    }
+    return map;
+  }, [channels.data]);
 
   const filtered = useMemo(() => {
     let list = channels.data ?? [];
