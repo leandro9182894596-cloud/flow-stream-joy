@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { Toaster } from "../components/ui/sonner";
+import { TvRemoteNavigation } from "../components/TvRemoteNavigation";
 import { AccountProvider } from "../hooks/use-account";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -139,6 +140,7 @@ function RootComponent() {
       <AccountProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
+        <TvRemoteNavigation />
         <Toaster position="top-center" theme="dark" richColors />
       </AccountProvider>
     </QueryClientProvider>
