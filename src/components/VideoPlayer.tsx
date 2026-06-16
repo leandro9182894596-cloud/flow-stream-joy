@@ -155,11 +155,12 @@ export function VideoPlayer({
         if (HlsMod.isSupported()) {
           const live = !!source.isLive;
           const hls = new HlsMod({
-            // Larger buffer keeps live TV smooth on unstable connections.
-            maxBufferLength: live ? 60 : 30,
-            maxMaxBufferLength: live ? 180 : 120,
-            backBufferLength: live ? 60 : 30,
-            maxBufferSize: 120 * 1000 * 1000,
+            // Moderate buffers: big enough to ride out jitter, small enough to
+            // avoid overwhelming weak devices (TV Box) and causing freezes.
+            maxBufferLength: live ? 20 : 30,
+            maxMaxBufferLength: live ? 40 : 90,
+            backBufferLength: live ? 15 : 30,
+            maxBufferSize: 60 * 1000 * 1000,
             maxBufferHole: 0.5,
             // Adaptive bitrate based on measured bandwidth.
             abrEwmaDefaultEstimate: 1_000_000,
@@ -167,12 +168,12 @@ export function VideoPlayer({
             // Low-latency mode causes stutter on weak links — keep it off and
             // hold a healthy live buffer instead.
             lowLatencyMode: false,
-            liveSyncDurationCount: 4,
-            liveMaxLatencyDurationCount: 12,
+            liveSyncDurationCount: 3,
+            liveMaxLatencyDurationCount: 10,
             // Robust recovery
-            fragLoadingMaxRetry: 8,
-            manifestLoadingMaxRetry: 8,
-            levelLoadingMaxRetry: 8,
+            fragLoadingMaxRetry: 6,
+            manifestLoadingMaxRetry: 6,
+            levelLoadingMaxRetry: 6,
             fragLoadingRetryDelay: 1000,
           });
           hlsRef.current = hls;
