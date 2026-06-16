@@ -140,6 +140,7 @@ function RootComponent() {
       <AccountProvider>
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
+        <TvRemoteNavigation />
         <Toaster position="top-center" theme="dark" richColors />
       </AccountProvider>
     </QueryClientProvider>
